@@ -21,7 +21,7 @@ pub struct UpdateNftDataV1Ix {
 #[derive(Accounts)]
 pub struct UpdateNftDataV1Ctx<'info> {
     #[account(
-        mut, 
+        mut,
         seeds = [
             "nft".as_bytes(), 
             asset.key().as_ref()

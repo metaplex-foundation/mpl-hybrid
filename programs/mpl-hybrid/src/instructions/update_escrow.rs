@@ -22,7 +22,7 @@ pub struct UpdateEscrowV1Ix {
 #[derive(Accounts)]
 pub struct UpdateEscrowV1Ctx<'info> {
     #[account(
-        mut, 
+        mut,
         seeds = [
             "escrow".as_bytes(), 
             collection.key().as_ref()

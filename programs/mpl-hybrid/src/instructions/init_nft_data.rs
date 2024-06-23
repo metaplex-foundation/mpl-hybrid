@@ -22,13 +22,13 @@ pub struct InitNftDataV1Ix {
 #[derive(Accounts)]
 pub struct InitNftDataV1Ctx<'info> {
     #[account(
-        init, 
+        init,
         seeds = [
             "nft".as_bytes(), 
             asset.key().as_ref()
             ],
-        bump, 
-        payer = authority, 
+        bump,
+        payer = authority,
         space = 500
     )]
     nft_data: Account<'info, NftDataV1>,

@@ -23,13 +23,13 @@ pub struct InitEscrowV1Ix {
 #[derive(Accounts)]
 pub struct InitEscrowV1Ctx<'info> {
     #[account(
-        init, 
+        init,
         seeds = [
             "escrow".as_bytes(), 
             collection.key().as_ref()
             ],
-        bump, 
-        payer = authority, 
+        bump,
+        payer = authority,
         space = 500
     )]
     escrow: Account<'info, EscrowV1>,

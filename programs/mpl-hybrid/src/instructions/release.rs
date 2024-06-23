@@ -26,7 +26,7 @@ pub struct ReleaseV1Ctx<'info> {
     authority: Signer<'info>,
 
     #[account(
-        mut, 
+        mut,
         seeds = [
             "escrow".as_bytes(), 
             collection.key().as_ref()

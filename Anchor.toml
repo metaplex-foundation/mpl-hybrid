@@ -1,0 +1,6 @@
+[programs.Devnet]
+mpl-hybrid = "MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"

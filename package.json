@@ -1,0 +1,20 @@
+{
+    "private": true,
+    "scripts": {
+        "programs:build": "./configs/scripts/program/build.sh",
+        "programs:test": "./configs/scripts/program/test.sh",
+        "programs:clean": "rm -rf ./programs/.bin",
+        "generate": "pnpm generate:idls && pnpm generate:clients",
+        "generate:idls": "node ./configs/shank.cjs",
+        "generate:clients": "node ./configs/kinobi.cjs",
+        "validator": "CI=1 amman start --config ./configs/validator.cjs",
+        "validator:debug": "amman start --config ./configs/validator.cjs",
+        "validator:stop": "amman stop"
+    },
+    "devDependencies": {
+        "@metaplex-foundation/kinobi": "^0.18.8-alpha.0",
+        "@metaplex-foundation/shank-js": "^0.1.7",
+        "@metaplex-foundation/amman": "^0.12.1",
+        "typescript": "^4.9.4"
+    }
+}

@@ -1,0 +1,2 @@
+[workspace]
+members = ["programs/mpl-hybrid", "clients/rust"]

@@ -1,0 +1,22 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# target
+/target
+
+# private keys
+MULXG4D5c1zavNj1x1XBZXZ5ZvFi2NiUsgRhLRVWM3w.json
+
+.anchor
+.DS_Store
+**/.DS_Store
+**/target
+**/*.rs.bk
+node_modules
+test-ledger
+dist
+.amman
+.crates
+.vscode
+.yarn
+programs/.bin
+clients/js/output.json

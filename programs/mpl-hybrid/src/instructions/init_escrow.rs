@@ -1,6 +1,6 @@
 use crate::constants::MPL_CORE;
-use crate::state::*;
 use crate::error::MplHybridError;
+use crate::state::*;
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
@@ -10,8 +10,8 @@ use mpl_core::types::Key as MplCoreKey;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct InitEscrowV1Ix {
-    name: String, 
-    uri: String, 
+    name: String,
+    uri: String,
     max: u64,
     min: u64,
     amount: u64,
@@ -38,13 +38,13 @@ pub struct InitEscrowV1Ctx<'info> {
     authority: Signer<'info>,
 
     /// CHECK: We check the collection bellow and with escrow seeds
-    collection:  UncheckedAccount<'info>,
+    collection: UncheckedAccount<'info>,
 
     /// CHECK: This is a user defined account
-    token:  Account<'info, Mint>,
+    token: Account<'info, Mint>,
 
     /// CHECK: This is a user defined account
-    fee_location:  UncheckedAccount<'info>,
+    fee_location: UncheckedAccount<'info>,
 
     /// The ATA for token fees to be stored
     #[account(
@@ -60,8 +60,7 @@ pub struct InitEscrowV1Ctx<'info> {
     associated_token_program: Program<'info, AssociatedToken>,
 }
 
-pub fn handler_init_escrow_v1(ctx: Context<InitEscrowV1Ctx>, ix:InitEscrowV1Ix) -> Result<()> {
-    
+pub fn handler_init_escrow_v1(ctx: Context<InitEscrowV1Ctx>, ix: InitEscrowV1Ix) -> Result<()> {
     let escrow = &mut ctx.accounts.escrow;
     let collection = &mut ctx.accounts.collection;
     let authority = &mut ctx.accounts.authority;
@@ -73,35 +72,37 @@ pub fn handler_init_escrow_v1(ctx: Context<InitEscrowV1Ctx>, ix:InitEscrowV1Ix) 
         return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
     }
 
-    if *collection.owner != MPL_CORE || load_key(&collection.to_account_info(), 0)? != MplCoreKey::CollectionV1 {
+    if *collection.owner != MPL_CORE
+        || load_key(&collection.to_account_info(), 0)? != MplCoreKey::CollectionV1
+    {
         return Err(MplHybridError::InvalidCollectionAccount.into());
     }
 
     // We only fetch the Base collection to check authority.
-    let collection_data = BaseCollectionV1::from_bytes(&collection.to_account_info().data.borrow())?;
+    let collection_data =
+        BaseCollectionV1::from_bytes(&collection.to_account_info().data.borrow())?;
 
     // Check that the collection authority is the same as the escrow authority.
     if collection_data.update_authority != authority.key() {
         return Err(MplHybridError::InvalidCollectionAuthority.into());
     }
-    
+
     //initialize with input data
 
-    escrow.collection=collection.key();
-    escrow.authority=authority.key();
-    escrow.token=token.key();
+    escrow.collection = collection.key();
+    escrow.authority = authority.key();
+    escrow.token = token.key();
     escrow.fee_location = fee_location.key();
-    escrow.name=ix.name;
-    escrow.uri=ix.uri;
-    escrow.max=ix.max;
-    escrow.min=ix.min;
-    escrow.amount=ix.amount;
-    escrow.fee_amount=ix.fee_amount;
-    escrow.sol_fee_amount=ix.sol_fee_amount;
-    escrow.count=1;
-    escrow.path=ix.path;
-    escrow.bump=ctx.bumps.escrow;
+    escrow.name = ix.name;
+    escrow.uri = ix.uri;
+    escrow.max = ix.max;
+    escrow.min = ix.min;
+    escrow.amount = ix.amount;
+    escrow.fee_amount = ix.fee_amount;
+    escrow.sol_fee_amount = ix.sol_fee_amount;
+    escrow.count = 1;
+    escrow.path = ix.path;
+    escrow.bump = ctx.bumps.escrow;
 
     Ok(())
 }
-

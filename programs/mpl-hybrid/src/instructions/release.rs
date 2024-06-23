@@ -1,25 +1,29 @@
-
+use crate::constants::*;
 use crate::error::MplHybridError;
 use crate::state::*;
-use crate::constants::*;
 use anchor_lang::prelude::*;
-use anchor_lang::{accounts::{unchecked_account::UncheckedAccount, signer::Signer, program::Program}, system_program::System};
+use anchor_lang::{
+    accounts::{program::Program, signer::Signer, unchecked_account::UncheckedAccount},
+    system_program::System,
+};
 use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::token;
 use anchor_spl::token::Mint;
+use anchor_spl::token::{Token, TokenAccount, Transfer};
 use mpl_core::accounts::BaseAssetV1;
+use mpl_core::instructions::{
+    TransferV1Cpi, TransferV1InstructionArgs, UpdateV1Cpi, UpdateV1InstructionArgs,
+};
 use mpl_core::types::UpdateAuthority;
 use solana_program::program::invoke;
-use mpl_core::instructions::{UpdateV1Cpi,UpdateV1InstructionArgs,TransferV1Cpi,TransferV1InstructionArgs};
-use anchor_spl::token::{TokenAccount,Token,Transfer};
-use anchor_spl::token;
 
 #[derive(Accounts)]
 pub struct ReleaseV1Ctx<'info> {
     #[account(mut)]
     owner: Signer<'info>,
-    
+
     #[account(mut)]
-    authority: Signer<'info>, 
+    authority: Signer<'info>,
 
     #[account(
         mut, 
@@ -39,7 +43,7 @@ pub struct ReleaseV1Ctx<'info> {
     #[account(mut,
         address = escrow.collection
     )]
-    collection:  AccountInfo<'info>,
+    collection: AccountInfo<'info>,
 
     #[account(init_if_needed,
         payer = owner,
@@ -59,13 +63,13 @@ pub struct ReleaseV1Ctx<'info> {
     #[account(
         address = escrow.token @MplHybridError::InvalidMintAccount
     )]
-    token:  Account<'info, Mint>,
+    token: Account<'info, Mint>,
 
     #[account(init_if_needed,
         payer = owner,
         associated_token::mint = token,
         associated_token::authority = fee_project_account)]
-    fee_token_account: Account<'info,TokenAccount>,
+    fee_token_account: Account<'info, TokenAccount>,
 
     /// CHECK: We check against constant
     #[account(mut,
@@ -84,7 +88,7 @@ pub struct ReleaseV1Ctx<'info> {
         address = SLOT_HASHES @ MplHybridError::InvalidSlotHash
     )]
     recent_blockhashes: AccountInfo<'info>,
-    
+
     /// CHECK: We check against constant
     #[account(
         address = MPL_CORE @ MplHybridError::InvalidMplCore
@@ -96,7 +100,6 @@ pub struct ReleaseV1Ctx<'info> {
 }
 
 pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
-
     //Need to add account checks for security
 
     let owner = &mut ctx.accounts.owner;
@@ -104,15 +107,15 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
     let asset = &mut ctx.accounts.asset;
     let authority = &mut ctx.accounts.authority;
     let collection = &mut ctx.accounts.collection;
-    let mpl_core =&mut ctx.accounts.mpl_core;
-    let user_token_account =&mut ctx.accounts.user_token_account;
-    let escrow_token_account =&mut ctx.accounts.escrow_token_account;
-    let _fee_token_account =&mut ctx.accounts.fee_token_account;
-    let fee_sol_account =&mut ctx.accounts.fee_sol_account;
-    let fee_project_account =&mut ctx.accounts.fee_project_account;
-    let system_program =&mut ctx.accounts.system_program;
-    let token_program =&mut ctx.accounts.token_program;
-  
+    let mpl_core = &mut ctx.accounts.mpl_core;
+    let user_token_account = &mut ctx.accounts.user_token_account;
+    let escrow_token_account = &mut ctx.accounts.escrow_token_account;
+    let _fee_token_account = &mut ctx.accounts.fee_token_account;
+    let fee_sol_account = &mut ctx.accounts.fee_sol_account;
+    let fee_project_account = &mut ctx.accounts.fee_project_account;
+    let system_program = &mut ctx.accounts.system_program;
+    let token_program = &mut ctx.accounts.token_program;
+
     let collection_info = &collection.to_account_info();
     let authority_info = &authority.to_account_info();
     let owner_info = &owner.to_account_info();
@@ -127,12 +130,11 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
 
     //If the path is 0, we need to update the metadata onchain
     if Path::RerollMetadata.check(escrow.path) {
-
         //construct the captured uri
         let mut uri = escrow.uri.clone();
         let name = "Captured".to_string();
         let json_extension = ".json";
-    
+
         uri.push_str("captured");
         uri.push_str(json_extension);
 
@@ -143,12 +145,12 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
             collection: Some(collection_info),
             payer: &owner.to_account_info(),
             authority: Some(authority_info),
-            system_program:  &system_program.to_account_info(),
+            system_program: &system_program.to_account_info(),
             log_wrapper: None,
-            __args: UpdateV1InstructionArgs{
+            __args: UpdateV1InstructionArgs {
                 new_name: Some(name),
                 new_uri: Some(uri),
-                new_update_authority:None
+                new_update_authority: None,
             },
         };
 
@@ -164,25 +166,20 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         payer: &owner.to_account_info(),
         authority: Some(owner_info),
         new_owner: &escrow.to_account_info(),
-        system_program:  Some(system_info),
+        system_program: Some(system_info),
         log_wrapper: None,
-        __args: TransferV1InstructionArgs{
-            compression_proof:None
-        }
-    }; 
+        __args: TransferV1InstructionArgs {
+            compression_proof: None,
+        },
+    };
 
     //invoke the transfer instruction
     transfer_nft_ix.invoke()?;
 
     //create transfer token instruction
-    let cpi_program =  token_program.to_account_info();
+    let cpi_program = token_program.to_account_info();
 
-    let signer_seeds = 
-        &[
-            b"escrow",
-            collection.key.as_ref(),
-            &[escrow.bump],
-        ];
+    let signer_seeds = &[b"escrow", collection.key.as_ref(), &[escrow.bump]];
 
     let signer = &[&signer_seeds[..]];
 
@@ -192,7 +189,8 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         authority: escrow.to_account_info(),
     };
 
-    let transfer_cpi_ctx = CpiContext::new_with_signer(cpi_program.clone(), cpi_accounts_transfer,signer);
+    let transfer_cpi_ctx =
+        CpiContext::new_with_signer(cpi_program.clone(), cpi_accounts_transfer, signer);
 
     token::transfer(transfer_cpi_ctx, escrow.amount)?;
 
@@ -202,14 +200,11 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         &fee_sol_account.key(),
         PROTOCOL_FEE,
     );
-    
+
     //invoke the protocol transfer fee sol instruction
     invoke(
         &sol_fee_ix,
-        &[
-            owner.to_account_info(),
-            fee_sol_account.to_account_info(),
-        ],
+        &[owner.to_account_info(), fee_sol_account.to_account_info()],
     )?;
 
     //create project transfer fee sol instruction for project
@@ -218,7 +213,7 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         &fee_project_account.key(),
         escrow.sol_fee_amount,
     );
-    
+
     //invoke project the transfer fee sol instruction for project
     invoke(
         &sol_fee_project_ix,
@@ -228,10 +223,8 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         ],
     )?;
 
-    
     //increment the swap count
     escrow.count += 1;
 
     Ok(())
-
 }

@@ -1,15 +1,15 @@
-use crate::state::*;
 use crate::error::MplHybridError;
+use crate::state::*;
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
-use mpl_core::accounts::{BaseCollectionV1,BaseAssetV1};
+use mpl_core::accounts::{BaseAssetV1, BaseCollectionV1};
 use mpl_core::types::UpdateAuthority;
 
 //need to add options
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateNftDataV1Ix {
-    name: String, 
-    uri: String, 
+    name: String,
+    uri: String,
     max: u64,
     min: u64,
     amount: u64,
@@ -34,21 +34,23 @@ pub struct UpdateNftDataV1Ctx<'info> {
     authority: Signer<'info>,
 
     /// CHECK: We check bellow
-    collection:  UncheckedAccount<'info>,
+    collection: UncheckedAccount<'info>,
 
     /// CHECK: We check bellow and with nft data seeds
-    asset:  UncheckedAccount<'info>,
+    asset: UncheckedAccount<'info>,
 
     /// CHECK: This is a user defined account
-    token:  Account<'info, Mint>,
-    
+    token: Account<'info, Mint>,
+
     /// CHECK: This is a user defined account
-    fee_location:  UncheckedAccount<'info>,
-    system_program: Program<'info, System>
+    fee_location: UncheckedAccount<'info>,
+    system_program: Program<'info, System>,
 }
 
-pub fn handler_update_new_data_v1(ctx: Context<UpdateNftDataV1Ctx>, ix:UpdateNftDataV1Ix) -> Result<()> {
-   
+pub fn handler_update_new_data_v1(
+    ctx: Context<UpdateNftDataV1Ctx>,
+    ix: UpdateNftDataV1Ix,
+) -> Result<()> {
     let nft_data = &mut ctx.accounts.nft_data;
     let authority = &mut ctx.accounts.authority;
     let asset = &mut ctx.accounts.asset;
@@ -64,7 +66,8 @@ pub fn handler_update_new_data_v1(ctx: Context<UpdateNftDataV1Ctx>, ix:UpdateNft
     }
 
     // We only fetch the Base collection to check authority.
-    let collection_data = BaseCollectionV1::from_bytes(&collection.to_account_info().data.borrow())?;
+    let collection_data =
+        BaseCollectionV1::from_bytes(&collection.to_account_info().data.borrow())?;
 
     // Check that the collection authority is the same as the escrow authority.
     if collection_data.update_authority != authority.key() {
@@ -73,18 +76,17 @@ pub fn handler_update_new_data_v1(ctx: Context<UpdateNftDataV1Ctx>, ix:UpdateNft
 
     //update every thing not optimal
 
-    nft_data.authority=authority.key();
-    nft_data.token=token.key();
+    nft_data.authority = authority.key();
+    nft_data.token = token.key();
     nft_data.fee_location = fee_location.key();
-    nft_data.name=ix.name;
-    nft_data.uri=ix.uri;
-    nft_data.max=ix.max;
-    nft_data.min=ix.min;
-    nft_data.amount=ix.amount;
-    nft_data.fee_amount=ix.fee_amount;
-    nft_data.sol_fee_amount=ix.sol_fee_amount;
-    nft_data.path=ix.path;
+    nft_data.name = ix.name;
+    nft_data.uri = ix.uri;
+    nft_data.max = ix.max;
+    nft_data.min = ix.min;
+    nft_data.amount = ix.amount;
+    nft_data.fee_amount = ix.fee_amount;
+    nft_data.sol_fee_amount = ix.sol_fee_amount;
+    nft_data.path = ix.path;
 
     Ok(())
 }
-

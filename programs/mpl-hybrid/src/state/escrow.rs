@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
 
-pub const BASE_ESCROW_SIZE: usize = 8 + 32 + 32 + 32 + 32 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 2 + 1;
-
 #[account]
 pub struct EscrowV1 {
     //32 the collection account
@@ -32,4 +30,9 @@ pub struct EscrowV1 {
     pub path: u16,
     //1 escrow bump
     pub bump: u8,
+}
+
+impl EscrowV1 {
+    pub const BASE_ESCROW_SIZE: usize =
+        8 + 32 + 32 + 32 + 32 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 2 + 1;
 }

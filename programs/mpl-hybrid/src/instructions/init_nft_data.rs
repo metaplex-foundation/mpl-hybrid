@@ -1,11 +1,13 @@
 use crate::constants::MPL_CORE;
 use crate::error::MplHybridError;
 use crate::state::*;
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, Discriminator};
 use anchor_spl::token::Mint;
 use mpl_core::accounts::{BaseAssetV1, BaseCollectionV1};
 use mpl_core::load_key;
 use mpl_core::types::{Key as MplCoreKey, UpdateAuthority};
+use mpl_utils::create_or_allocate_account_raw;
+use solana_program::program_memory::sol_memcpy;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct InitNftDataV1Ix {
@@ -21,17 +23,16 @@ pub struct InitNftDataV1Ix {
 
 #[derive(Accounts)]
 pub struct InitNftDataV1Ctx<'info> {
+    /// CHECK: This account is checked and initialized in the handler.
     #[account(
-        init,
+        mut,
         seeds = [
             "nft".as_bytes(), 
             asset.key().as_ref()
             ],
         bump,
-        payer = authority,
-        space = 500
     )]
-    nft_data: Account<'info, NftDataV1>,
+    nft_data: AccountInfo<'info>,
 
     #[account(mut)]
     authority: Signer<'info>,
@@ -52,6 +53,19 @@ pub struct InitNftDataV1Ctx<'info> {
 
 pub fn handler_init_nft_data_v1(ctx: Context<InitNftDataV1Ctx>, ix: InitNftDataV1Ix) -> Result<()> {
     let nft_data = &mut ctx.accounts.nft_data;
+    create_or_allocate_account_raw(
+        crate::ID,
+        nft_data,
+        &ctx.accounts.system_program.to_account_info(),
+        &ctx.accounts.authority.to_account_info(),
+        NftDataV1::BASE_NFT_DATA_SIZE + ix.name.len() + ix.uri.len(),
+        &[
+            "escrow".as_bytes(),
+            &ctx.accounts.collection.key.to_bytes(),
+            &[ctx.bumps.nft_data],
+        ],
+    )?;
+
     let authority = &mut ctx.accounts.authority;
     let asset = &mut ctx.accounts.asset;
     let collection = &mut ctx.accounts.collection;
@@ -92,20 +106,32 @@ pub fn handler_init_nft_data_v1(ctx: Context<InitNftDataV1Ctx>, ix: InitNftDataV
     }
 
     //initialize with input data
+    let mut nft_data_data = NftDataV1::DISCRIMINATOR.to_vec();
+    nft_data_data.extend(
+        NftDataV1 {
+            authority: authority.key(),
+            token: token.key(),
+            fee_location: fee_location.key(),
+            name: ix.name,
+            uri: ix.uri,
+            max: ix.max,
+            min: ix.min,
+            amount: ix.amount,
+            fee_amount: ix.fee_amount,
+            sol_fee_amount: ix.sol_fee_amount,
+            count: 1,
+            path: ix.path,
+            bump: ctx.bumps.nft_data,
+        }
+        .try_to_vec()?,
+    );
 
-    nft_data.authority = authority.key();
-    nft_data.token = token.key();
-    nft_data.fee_location = fee_location.key();
-    nft_data.name = ix.name;
-    nft_data.uri = ix.uri;
-    nft_data.max = ix.max;
-    nft_data.min = ix.min;
-    nft_data.amount = ix.amount;
-    nft_data.fee_amount = ix.fee_amount;
-    nft_data.sol_fee_amount = ix.sol_fee_amount;
-    nft_data.count = 0;
-    nft_data.path = ix.path;
-    nft_data.bump = ctx.bumps.nft_data;
+    let mut escrow_data_borrowed = nft_data.data.borrow_mut();
+    sol_memcpy(
+        &mut escrow_data_borrowed,
+        &nft_data_data,
+        nft_data_data.len(),
+    );
 
     Ok(())
 }

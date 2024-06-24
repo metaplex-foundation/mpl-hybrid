@@ -1,12 +1,14 @@
 use crate::constants::MPL_CORE;
 use crate::error::MplHybridError;
 use crate::state::*;
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, Discriminator};
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use mpl_core::accounts::BaseCollectionV1;
 use mpl_core::load_key;
 use mpl_core::types::Key as MplCoreKey;
+use mpl_utils::create_or_allocate_account_raw;
+use solana_program::program_memory::sol_memcpy;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct InitEscrowV1Ix {
@@ -22,17 +24,16 @@ pub struct InitEscrowV1Ix {
 
 #[derive(Accounts)]
 pub struct InitEscrowV1Ctx<'info> {
+    /// CHECK: This account is checked and initialized in the handler.
     #[account(
-        init,
+        mut,
         seeds = [
             "escrow".as_bytes(), 
             collection.key().as_ref()
             ],
         bump,
-        payer = authority,
-        space = 500
     )]
-    escrow: Account<'info, EscrowV1>,
+    escrow: AccountInfo<'info>,
 
     #[account(mut)]
     authority: Signer<'info>,
@@ -62,6 +63,19 @@ pub struct InitEscrowV1Ctx<'info> {
 
 pub fn handler_init_escrow_v1(ctx: Context<InitEscrowV1Ctx>, ix: InitEscrowV1Ix) -> Result<()> {
     let escrow = &mut ctx.accounts.escrow;
+    create_or_allocate_account_raw(
+        crate::ID,
+        escrow,
+        &ctx.accounts.system_program.to_account_info(),
+        &ctx.accounts.authority.to_account_info(),
+        EscrowV1::BASE_ESCROW_SIZE + ix.name.len() + ix.uri.len(),
+        &[
+            "escrow".as_bytes(),
+            &ctx.accounts.collection.key.to_bytes(),
+            &[ctx.bumps.escrow],
+        ],
+    )?;
+
     let collection = &mut ctx.accounts.collection;
     let authority = &mut ctx.accounts.authority;
     let token = &mut ctx.accounts.token;
@@ -88,21 +102,29 @@ pub fn handler_init_escrow_v1(ctx: Context<InitEscrowV1Ctx>, ix: InitEscrowV1Ix)
     }
 
     //initialize with input data
+    let mut escrow_data = EscrowV1::DISCRIMINATOR.to_vec();
+    escrow_data.extend(
+        EscrowV1 {
+            collection: collection.key(),
+            authority: authority.key(),
+            token: token.key(),
+            fee_location: fee_location.key(),
+            name: ix.name,
+            uri: ix.uri,
+            max: ix.max,
+            min: ix.min,
+            amount: ix.amount,
+            fee_amount: ix.fee_amount,
+            sol_fee_amount: ix.sol_fee_amount,
+            count: 1,
+            path: ix.path,
+            bump: ctx.bumps.escrow,
+        }
+        .try_to_vec()?,
+    );
 
-    escrow.collection = collection.key();
-    escrow.authority = authority.key();
-    escrow.token = token.key();
-    escrow.fee_location = fee_location.key();
-    escrow.name = ix.name;
-    escrow.uri = ix.uri;
-    escrow.max = ix.max;
-    escrow.min = ix.min;
-    escrow.amount = ix.amount;
-    escrow.fee_amount = ix.fee_amount;
-    escrow.sol_fee_amount = ix.sol_fee_amount;
-    escrow.count = 1;
-    escrow.path = ix.path;
-    escrow.bump = ctx.bumps.escrow;
+    let mut escrow_data_borrowed = escrow.data.borrow_mut();
+    sol_memcpy(&mut escrow_data_borrowed, &escrow_data, escrow_data.len());
 
     Ok(())
 }

@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
 
-pub const BASE_NFT_DATA_SIZE: usize = 8 + 32 + 32 + 32 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 2 + 1;
-
 #[account]
 pub struct NftDataV1 {
     //32 the escrow authority (must match collection authority)
@@ -30,4 +28,8 @@ pub struct NftDataV1 {
     pub path: u16,
     //1 escrow bump
     pub bump: u8,
+}
+
+impl NftDataV1 {
+    pub const BASE_NFT_DATA_SIZE: usize = 8 + 32 + 32 + 32 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 2 + 1;
 }

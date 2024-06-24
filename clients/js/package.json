@@ -1,6 +1,6 @@
 {
   "name": "@metaplex-foundation/mpl-hybrid",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The swap program powering SPL-404s on Solana and the MPL-404 protocol. A collaboration between Mutant Labs and Metaplex.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",

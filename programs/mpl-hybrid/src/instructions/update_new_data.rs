@@ -4,18 +4,19 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 use mpl_core::accounts::{BaseAssetV1, BaseCollectionV1};
 use mpl_core::types::UpdateAuthority;
+use mpl_utils::resize_or_reallocate_account_raw;
 
 //need to add options
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateNftDataV1Ix {
-    name: String,
-    uri: String,
-    max: u64,
-    min: u64,
-    amount: u64,
-    fee_amount: u64,
-    sol_fee_amount: u64,
-    path: u16,
+    name: Option<String>,
+    uri: Option<String>,
+    max: Option<u64>,
+    min: Option<u64>,
+    amount: Option<u64>,
+    fee_amount: Option<u64>,
+    sol_fee_amount: Option<u64>,
+    path: Option<u16>,
 }
 
 #[derive(Accounts)]
@@ -74,19 +75,54 @@ pub fn handler_update_new_data_v1(
         return Err(MplHybridError::InvalidCollectionAuthority.into());
     }
 
-    //update every thing not optimal
-
+    let mut size_diff: isize = 0;
     nft_data.authority = authority.key();
     nft_data.token = token.key();
     nft_data.fee_location = fee_location.key();
-    nft_data.name = ix.name;
-    nft_data.uri = ix.uri;
-    nft_data.max = ix.max;
-    nft_data.min = ix.min;
-    nft_data.amount = ix.amount;
-    nft_data.fee_amount = ix.fee_amount;
-    nft_data.sol_fee_amount = ix.sol_fee_amount;
-    nft_data.path = ix.path;
+    if let Some(name) = ix.name {
+        size_diff += name
+            .len()
+            .checked_sub(nft_data.name.len())
+            .ok_or(MplHybridError::NumericalOverflow)? as isize;
+        nft_data.name = name;
+    }
+    if let Some(uri) = ix.uri {
+        size_diff += uri
+            .len()
+            .checked_sub(nft_data.uri.len())
+            .ok_or(MplHybridError::NumericalOverflow)? as isize;
+        nft_data.uri = uri;
+    }
+    if let Some(max) = ix.max {
+        nft_data.max = max;
+    }
+    if let Some(min) = ix.min {
+        nft_data.min = min;
+    }
+    if let Some(amount) = ix.amount {
+        nft_data.amount = amount;
+    }
+    if let Some(fee_amount) = ix.fee_amount {
+        nft_data.fee_amount = fee_amount;
+    }
+    if let Some(sol_fee_amount) = ix.sol_fee_amount {
+        nft_data.sol_fee_amount = sol_fee_amount;
+    }
+    if let Some(path) = ix.path {
+        nft_data.path = path;
+    }
+
+    let new_size = nft_data
+        .to_account_info()
+        .data_len()
+        .checked_add(size_diff as usize)
+        .ok_or(MplHybridError::NumericalOverflow)?;
+    resize_or_reallocate_account_raw(
+        &nft_data.to_account_info(),
+        authority,
+        &ctx.accounts.system_program,
+        new_size,
+    )?;
 
     Ok(())
 }

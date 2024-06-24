@@ -3,18 +3,19 @@ use crate::state::*;
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 use mpl_core::accounts::BaseCollectionV1;
+use mpl_utils::resize_or_reallocate_account_raw;
 
 //need to add options
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateEscrowV1Ix {
-    name: String,
-    uri: String,
-    max: u64,
-    min: u64,
-    amount: u64,
-    fee_amount: u64,
-    sol_fee_amount: u64,
-    path: u16,
+    name: Option<String>,
+    uri: Option<String>,
+    max: Option<u64>,
+    min: Option<u64>,
+    amount: Option<u64>,
+    fee_amount: Option<u64>,
+    sol_fee_amount: Option<u64>,
+    path: Option<u16>,
 }
 
 //Need to define accounts better
@@ -27,7 +28,7 @@ pub struct UpdateEscrowV1Ctx<'info> {
             "escrow".as_bytes(), 
             collection.key().as_ref()
             ],
-        bump=escrow.bump
+        bump=escrow.bump,
     )]
     escrow: Account<'info, EscrowV1>,
 
@@ -69,19 +70,54 @@ pub fn handler_update_escrow_v1(
         return Err(MplHybridError::InvalidCollectionAuthority.into());
     }
 
-    //update every thing not optimal
-
+    let mut size_diff: isize = 0;
     escrow.authority = authority.key();
     escrow.token = token.key();
     escrow.fee_location = fee_location.key();
-    escrow.name = ix.name;
-    escrow.uri = ix.uri;
-    escrow.max = ix.max;
-    escrow.min = ix.min;
-    escrow.amount = ix.amount;
-    escrow.fee_amount = ix.fee_amount;
-    escrow.sol_fee_amount = ix.sol_fee_amount;
-    escrow.path = ix.path;
+    if let Some(name) = ix.name {
+        size_diff += name
+            .len()
+            .checked_sub(escrow.name.len())
+            .ok_or(MplHybridError::NumericalOverflow)? as isize;
+        escrow.name = name;
+    }
+    if let Some(uri) = ix.uri {
+        size_diff += uri
+            .len()
+            .checked_sub(escrow.uri.len())
+            .ok_or(MplHybridError::NumericalOverflow)? as isize;
+        escrow.uri = uri;
+    }
+    if let Some(max) = ix.max {
+        escrow.max = max;
+    }
+    if let Some(min) = ix.min {
+        escrow.min = min;
+    }
+    if let Some(amount) = ix.amount {
+        escrow.amount = amount;
+    }
+    if let Some(fee_amount) = ix.fee_amount {
+        escrow.fee_amount = fee_amount;
+    }
+    if let Some(sol_fee_amount) = ix.sol_fee_amount {
+        escrow.sol_fee_amount = sol_fee_amount;
+    }
+    if let Some(path) = ix.path {
+        escrow.path = path;
+    }
+
+    let new_size = escrow
+        .to_account_info()
+        .data_len()
+        .checked_add(size_diff as usize)
+        .ok_or(MplHybridError::NumericalOverflow)?;
+    resize_or_reallocate_account_raw(
+        &escrow.to_account_info(),
+        authority,
+        &ctx.accounts.system_program,
+        new_size,
+    )?;
 
     Ok(())
 }

@@ -8,6 +8,8 @@
 
 import {
   Context,
+  Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
   Signer,
@@ -18,6 +20,7 @@ import {
   Serializer,
   array,
   mapSerializer,
+  option,
   string,
   struct,
   u16,
@@ -44,25 +47,25 @@ export type UpdateNewDataV1InstructionAccounts = {
 // Data.
 export type UpdateNewDataV1InstructionData = {
   discriminator: Array<number>;
-  name: string;
-  uri: string;
-  max: bigint;
-  min: bigint;
-  amount: bigint;
-  feeAmount: bigint;
-  solFeeAmount: bigint;
-  path: number;
+  name: Option<string>;
+  uri: Option<string>;
+  max: Option<bigint>;
+  min: Option<bigint>;
+  amount: Option<bigint>;
+  feeAmount: Option<bigint>;
+  solFeeAmount: Option<bigint>;
+  path: Option<number>;
 };
 
 export type UpdateNewDataV1InstructionDataArgs = {
-  name: string;
-  uri: string;
-  max: number | bigint;
-  min: number | bigint;
-  amount: number | bigint;
-  feeAmount: number | bigint;
-  solFeeAmount: number | bigint;
-  path: number;
+  name: OptionOrNullable<string>;
+  uri: OptionOrNullable<string>;
+  max: OptionOrNullable<number | bigint>;
+  min: OptionOrNullable<number | bigint>;
+  amount: OptionOrNullable<number | bigint>;
+  feeAmount: OptionOrNullable<number | bigint>;
+  solFeeAmount: OptionOrNullable<number | bigint>;
+  path: OptionOrNullable<number>;
 };
 
 export function getUpdateNewDataV1InstructionDataSerializer(): Serializer<
@@ -77,14 +80,14 @@ export function getUpdateNewDataV1InstructionDataSerializer(): Serializer<
     struct<UpdateNewDataV1InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
-        ['name', string()],
-        ['uri', string()],
-        ['max', u64()],
-        ['min', u64()],
-        ['amount', u64()],
-        ['feeAmount', u64()],
-        ['solFeeAmount', u64()],
-        ['path', u16()],
+        ['name', option(string())],
+        ['uri', option(string())],
+        ['max', option(u64())],
+        ['min', option(u64())],
+        ['amount', option(u64())],
+        ['feeAmount', option(u64())],
+        ['solFeeAmount', option(u64())],
+        ['path', option(u16())],
       ],
       { description: 'UpdateNewDataV1InstructionData' }
     ),

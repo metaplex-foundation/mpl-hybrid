@@ -161,6 +161,19 @@ export class InvalidMintAccountError extends ProgramError {
 codeToErrorMap.set(0x177a, InvalidMintAccountError);
 nameToErrorMap.set('InvalidMintAccount', InvalidMintAccountError);
 
+/** NumericalOverflow: Numerical Overflow */
+export class NumericalOverflowError extends ProgramError {
+  override readonly name: string = 'NumericalOverflow';
+
+  readonly code: number = 0x177b; // 6011
+
+  constructor(program: Program, cause?: Error) {
+    super('Numerical Overflow', program, cause);
+  }
+}
+codeToErrorMap.set(0x177b, NumericalOverflowError);
+nameToErrorMap.set('NumericalOverflow', NumericalOverflowError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

@@ -94,14 +94,14 @@ impl UpdateEscrowV1InstructionData {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct UpdateEscrowV1InstructionArgs {
-    pub name: String,
-    pub uri: String,
-    pub max: u64,
-    pub min: u64,
-    pub amount: u64,
-    pub fee_amount: u64,
-    pub sol_fee_amount: u64,
-    pub path: u16,
+    pub name: Option<String>,
+    pub uri: Option<String>,
+    pub max: Option<u64>,
+    pub min: Option<u64>,
+    pub amount: Option<u64>,
+    pub fee_amount: Option<u64>,
+    pub sol_fee_amount: Option<u64>,
+    pub path: Option<u16>,
 }
 
 /// Instruction builder for `UpdateEscrowV1`.
@@ -168,41 +168,49 @@ impl UpdateEscrowV1Builder {
         self.system_program = Some(system_program);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn name(&mut self, name: String) -> &mut Self {
         self.name = Some(name);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn uri(&mut self, uri: String) -> &mut Self {
         self.uri = Some(uri);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn max(&mut self, max: u64) -> &mut Self {
         self.max = Some(max);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn min(&mut self, min: u64) -> &mut Self {
         self.min = Some(min);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn amount(&mut self, amount: u64) -> &mut Self {
         self.amount = Some(amount);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn fee_amount(&mut self, fee_amount: u64) -> &mut Self {
         self.fee_amount = Some(fee_amount);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn sol_fee_amount(&mut self, sol_fee_amount: u64) -> &mut Self {
         self.sol_fee_amount = Some(sol_fee_amount);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn path(&mut self, path: u16) -> &mut Self {
         self.path = Some(path);
@@ -239,17 +247,14 @@ impl UpdateEscrowV1Builder {
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
         };
         let args = UpdateEscrowV1InstructionArgs {
-            name: self.name.clone().expect("name is not set"),
-            uri: self.uri.clone().expect("uri is not set"),
-            max: self.max.clone().expect("max is not set"),
-            min: self.min.clone().expect("min is not set"),
-            amount: self.amount.clone().expect("amount is not set"),
-            fee_amount: self.fee_amount.clone().expect("fee_amount is not set"),
-            sol_fee_amount: self
-                .sol_fee_amount
-                .clone()
-                .expect("sol_fee_amount is not set"),
-            path: self.path.clone().expect("path is not set"),
+            name: self.name.clone(),
+            uri: self.uri.clone(),
+            max: self.max.clone(),
+            min: self.min.clone(),
+            amount: self.amount.clone(),
+            fee_amount: self.fee_amount.clone(),
+            sol_fee_amount: self.sol_fee_amount.clone(),
+            path: self.path.clone(),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -483,41 +488,49 @@ impl<'a, 'b> UpdateEscrowV1CpiBuilder<'a, 'b> {
         self.instruction.system_program = Some(system_program);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn name(&mut self, name: String) -> &mut Self {
         self.instruction.name = Some(name);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn uri(&mut self, uri: String) -> &mut Self {
         self.instruction.uri = Some(uri);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn max(&mut self, max: u64) -> &mut Self {
         self.instruction.max = Some(max);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn min(&mut self, min: u64) -> &mut Self {
         self.instruction.min = Some(min);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn amount(&mut self, amount: u64) -> &mut Self {
         self.instruction.amount = Some(amount);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn fee_amount(&mut self, fee_amount: u64) -> &mut Self {
         self.instruction.fee_amount = Some(fee_amount);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn sol_fee_amount(&mut self, sol_fee_amount: u64) -> &mut Self {
         self.instruction.sol_fee_amount = Some(sol_fee_amount);
         self
     }
+    /// `[optional argument]`
     #[inline(always)]
     pub fn path(&mut self, path: u16) -> &mut Self {
         self.instruction.path = Some(path);
@@ -565,22 +578,14 @@ impl<'a, 'b> UpdateEscrowV1CpiBuilder<'a, 'b> {
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
         let args = UpdateEscrowV1InstructionArgs {
-            name: self.instruction.name.clone().expect("name is not set"),
-            uri: self.instruction.uri.clone().expect("uri is not set"),
-            max: self.instruction.max.clone().expect("max is not set"),
-            min: self.instruction.min.clone().expect("min is not set"),
-            amount: self.instruction.amount.clone().expect("amount is not set"),
-            fee_amount: self
-                .instruction
-                .fee_amount
-                .clone()
-                .expect("fee_amount is not set"),
-            sol_fee_amount: self
-                .instruction
-                .sol_fee_amount
-                .clone()
-                .expect("sol_fee_amount is not set"),
-            path: self.instruction.path.clone().expect("path is not set"),
+            name: self.instruction.name.clone(),
+            uri: self.instruction.uri.clone(),
+            max: self.instruction.max.clone(),
+            min: self.instruction.min.clone(),
+            amount: self.instruction.amount.clone(),
+            fee_amount: self.instruction.fee_amount.clone(),
+            sol_fee_amount: self.instruction.sol_fee_amount.clone(),
+            path: self.instruction.path.clone(),
         };
         let instruction = UpdateEscrowV1Cpi {
             __program: self.instruction.__program,

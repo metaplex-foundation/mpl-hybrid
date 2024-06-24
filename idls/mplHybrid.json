@@ -589,35 +589,51 @@
         "fields": [
           {
             "name": "name",
-            "type": "string"
+            "type": {
+              "option": "string"
+            }
           },
           {
             "name": "uri",
-            "type": "string"
+            "type": {
+              "option": "string"
+            }
           },
           {
             "name": "max",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "min",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "amount",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "feeAmount",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "solFeeAmount",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "path",
-            "type": "u16"
+            "type": {
+              "option": "u16"
+            }
           }
         ]
       }
@@ -629,35 +645,51 @@
         "fields": [
           {
             "name": "name",
-            "type": "string"
+            "type": {
+              "option": "string"
+            }
           },
           {
             "name": "uri",
-            "type": "string"
+            "type": {
+              "option": "string"
+            }
           },
           {
             "name": "max",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "min",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "amount",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "feeAmount",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "solFeeAmount",
-            "type": "u64"
+            "type": {
+              "option": "u64"
+            }
           },
           {
             "name": "path",
-            "type": "u16"
+            "type": {
+              "option": "u16"
+            }
           }
         ]
       }
@@ -729,6 +761,11 @@
       "code": 6010,
       "name": "InvalidMintAccount",
       "msg": "Invalid Mint Account"
+    },
+    {
+      "code": 6011,
+      "name": "NumericalOverflow",
+      "msg": "Numerical Overflow"
     }
   ],
   "metadata": {

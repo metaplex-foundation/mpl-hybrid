@@ -43,6 +43,9 @@ pub enum MplHybridError {
     /// 6010 (0x177A) - Invalid Mint Account
     #[error("Invalid Mint Account")]
     InvalidMintAccount,
+    /// 6011 (0x177B) - Numerical Overflow
+    #[error("Numerical Overflow")]
+    NumericalOverflow,
 }
 
 impl solana_program::program_error::PrintProgramError for MplHybridError {

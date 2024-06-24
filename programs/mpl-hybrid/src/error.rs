@@ -24,4 +24,6 @@ pub enum MplHybridError {
     MaxMustBeGreaterThanMin,
     #[msg("Invalid Mint Account")]
     InvalidMintAccount,
+    #[msg("Numerical Overflow")]
+    NumericalOverflow,
 }

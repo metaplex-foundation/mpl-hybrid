@@ -60,8 +60,8 @@ pub fn handler_init_nft_data_v1(ctx: Context<InitNftDataV1Ctx>, ix: InitNftDataV
         &ctx.accounts.authority.to_account_info(),
         NftDataV1::BASE_NFT_DATA_SIZE + ix.name.len() + ix.uri.len(),
         &[
-            "escrow".as_bytes(),
-            &ctx.accounts.collection.key.to_bytes(),
+            "nft".as_bytes(),
+            &ctx.accounts.asset.key.to_bytes(),
             &[ctx.bumps.nft_data],
         ],
     )?;
@@ -119,7 +119,7 @@ pub fn handler_init_nft_data_v1(ctx: Context<InitNftDataV1Ctx>, ix: InitNftDataV
             amount: ix.amount,
             fee_amount: ix.fee_amount,
             sol_fee_amount: ix.sol_fee_amount,
-            count: 1,
+            count: 0,
             path: ix.path,
             bump: ctx.bumps.nft_data,
         }

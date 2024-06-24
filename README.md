@@ -4,7 +4,7 @@ The swap program powering SPL-404s on Solana and the MPL-404 protocol. A collabo
 
 ## Documentation
 
-Read the full documentation [here]([https://developers.metaplex.com](https://developers.metaplex.com/mpl-404))
+Read the full documentation [here](https://developers.metaplex.com/mpl-404)
 
 ## Programs
 

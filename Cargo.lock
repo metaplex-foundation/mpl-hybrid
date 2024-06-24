@@ -991,9 +991,9 @@ dependencies = [
 
 [[package]]
 name = "bytemuck"
-version = "1.15.0"
+version = "1.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d6d68c57235a3a081186990eca2867354726650f42f7516ca50c28d6281fd15"
+checksum = "b236fc92302c97ed75b38da1f4917b5cdda4984745740f153a5d3059e48d725e"
 dependencies = [
  "bytemuck_derive",
 ]
@@ -2464,9 +2464,9 @@ dependencies = [
 
 [[package]]
 name = "mpl-core"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69b314fcf76dc22cc42a02a208231c667d0c533ce140d6ba9985df5a2a50b0aa"
+checksum = "cefa4362d05dec8fb97ebebf20fb2dc5224228c8c9550d9da8f2d1b657b49954"
 dependencies = [
  "base64 0.22.1",
  "borsh 0.10.3",
@@ -2508,7 +2508,6 @@ dependencies = [
  "anchor-spl",
  "arrayref",
  "getrandom 0.2.14",
- "modular-bitfield",
  "mpl-core",
  "proptest",
  "solana-program",

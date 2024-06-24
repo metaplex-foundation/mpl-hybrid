@@ -1,2 +1,10 @@
 [workspace]
+resolver = "2"
 members = ["programs/mpl-hybrid", "clients/rust"]
+
+[profile.release]
+overflow-checks = true # Enable integer overflow checks.
+strip = true           # Automatically strip symbols from the binary.
+opt-level = 3          # Optimize for speed.
+lto = true
+codegen-units = 1

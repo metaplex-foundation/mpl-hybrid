@@ -1,11 +1,11 @@
 [package]
 name = "mpl-hybrid"
-description = "A flexible digital asset standard for Solana"
+description = "The swap program powering SPL-404s on Solana and the MPL-404 protocol. A collaboration between Mutant Labs and Metaplex."
 repository = "https://github.com/metaplex-foundation/mpl-core"
-version = "0.7.0"
+version = "0.1.0"
 edition = "2021"
 readme = "README.md"
-license-file = "../../LICENSE"
+license-file = "../../LICENSE.txt"
 
 [lib]
 crate-type = ["cdylib", "lib"]

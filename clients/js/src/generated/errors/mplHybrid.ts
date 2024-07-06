@@ -174,6 +174,19 @@ export class NumericalOverflowError extends ProgramError {
 codeToErrorMap.set(0x177b, NumericalOverflowError);
 nameToErrorMap.set('NumericalOverflow', NumericalOverflowError);
 
+/** InvalidIngredient: Not a valid Ingredient */
+export class InvalidIngredientError extends ProgramError {
+  override readonly name: string = 'InvalidIngredient';
+
+  readonly code: number = 0x177c; // 6012
+
+  constructor(program: Program, cause?: Error) {
+    super('Not a valid Ingredient', program, cause);
+  }
+}
+codeToErrorMap.set(0x177c, InvalidIngredientError);
+nameToErrorMap.set('InvalidIngredient', InvalidIngredientError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

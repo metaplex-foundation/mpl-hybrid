@@ -1578,6 +1578,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "enum-as-inner"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ffccbb6966c05b32ef8fbac435df276c4ae4d3dc55a8cd0eb9745e6c12f546a"
+dependencies = [
+ "heck 0.4.1",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.60",
+]
+
+[[package]]
 name = "enum-iterator"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2464,10 +2476,11 @@ dependencies = [
 
 [[package]]
 name = "mpl-core"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cefa4362d05dec8fb97ebebf20fb2dc5224228c8c9550d9da8f2d1b657b49954"
+checksum = "e1d4f516cd9daae872182a50850ab6d5588667e71152d49b0729a32830036b83"
 dependencies = [
+ "anchor-lang 0.30.0",
  "base64 0.22.1",
  "borsh 0.10.3",
  "modular-bitfield",
@@ -2507,6 +2520,7 @@ dependencies = [
  "anchor-lang 0.29.0",
  "anchor-spl",
  "arrayref",
+ "enum-as-inner",
  "getrandom 0.2.14",
  "mpl-core",
  "mpl-utils",

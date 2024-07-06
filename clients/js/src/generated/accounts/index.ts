@@ -8,3 +8,5 @@
 
 export * from './escrowV1';
 export * from './nftDataV1';
+export * from './recipeChecklistV1';
+export * from './recipeV1';

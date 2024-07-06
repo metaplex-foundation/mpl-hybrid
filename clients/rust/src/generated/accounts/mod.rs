@@ -7,6 +7,10 @@
 
 pub(crate) mod r#escrow_v1;
 pub(crate) mod r#nft_data_v1;
+pub(crate) mod r#recipe_checklist_v1;
+pub(crate) mod r#recipe_v1;
 
 pub use self::r#escrow_v1::*;
 pub use self::r#nft_data_v1::*;
+pub use self::r#recipe_checklist_v1::*;
+pub use self::r#recipe_v1::*;

@@ -441,6 +441,74 @@
       }
     },
     {
+      "name": "RecipeV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "count",
+            "type": "u64"
+          },
+          {
+            "name": "reversible",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "inputs",
+            "type": {
+              "vec": {
+                "defined": "IngredientTriggerPairV1"
+              }
+            }
+          },
+          {
+            "name": "outputs",
+            "type": {
+              "vec": {
+                "defined": "IngredientTriggerPairV1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RecipeChecklistV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "inputs",
+            "type": {
+              "vec": {
+                "defined": "CheckPairV1"
+              }
+            }
+          },
+          {
+            "name": "outputs",
+            "type": {
+              "vec": {
+                "defined": "CheckPairV1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "NftDataV1",
       "type": {
         "kind": "struct",
@@ -502,6 +570,70 @@
     }
   ],
   "types": [
+    {
+      "name": "CreateRecipeArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reversible",
+            "type": "bool"
+          },
+          {
+            "name": "inputs",
+            "type": {
+              "vec": {
+                "defined": "IngredientTriggerPairV1"
+              }
+            }
+          },
+          {
+            "name": "outputs",
+            "type": {
+              "vec": {
+                "defined": "IngredientTriggerPairV1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositCoreAssetArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reversed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositSolArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reversed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositSplTokenArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reversed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
     {
       "name": "InitEscrowV1Ix",
       "type": {
@@ -695,6 +827,219 @@
       }
     },
     {
+      "name": "WithdrawCoreAssetArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reversed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WithdrawSolArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reversed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WithdrawSplTokenArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reversed",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "IngredientTriggerPairV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ingredient",
+            "type": {
+              "defined": "IngredientV1"
+            }
+          },
+          {
+            "name": "trigger",
+            "type": {
+              "defined": "TriggerV1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CheckPairV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "ingredientChecked",
+            "type": "bool"
+          },
+          {
+            "name": "triggerChecked",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TriggerV1",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Rename",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "uri",
+                "type": "string"
+              },
+              {
+                "name": "max",
+                "type": "u32"
+              },
+              {
+                "name": "min",
+                "type": "u32"
+              }
+            ]
+          },
+          {
+            "name": "SolFee",
+            "fields": [
+              {
+                "name": "amount",
+                "type": "u64"
+              },
+              {
+                "name": "feeAccount",
+                "type": "publicKey"
+              }
+            ]
+          },
+          {
+            "name": "TokenFee",
+            "fields": [
+              {
+                "name": "amount",
+                "type": "u64"
+              },
+              {
+                "name": "feeAccount",
+                "type": "publicKey"
+              },
+              {
+                "name": "feeTokenAccount",
+                "type": "publicKey"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "IngredientV1",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Sol",
+            "fields": [
+              "u64"
+            ]
+          },
+          {
+            "name": "CoreAsset",
+            "fields": [
+              "publicKey"
+            ]
+          },
+          {
+            "name": "CoreCollection",
+            "fields": [
+              "publicKey"
+            ]
+          },
+          {
+            "name": "SplToken",
+            "fields": [
+              "publicKey",
+              "u64"
+            ]
+          },
+          {
+            "name": "SplToken22",
+            "fields": [
+              "publicKey",
+              "u64"
+            ]
+          },
+          {
+            "name": "TmNft",
+            "fields": [
+              "publicKey"
+            ]
+          },
+          {
+            "name": "TmNftCollection",
+            "fields": [
+              "publicKey"
+            ]
+          },
+          {
+            "name": "TmPNft",
+            "fields": [
+              "publicKey"
+            ]
+          },
+          {
+            "name": "TmPNftCollection",
+            "fields": [
+              "publicKey"
+            ]
+          },
+          {
+            "name": "CompressedNft",
+            "fields": [
+              "publicKey"
+            ]
+          },
+          {
+            "name": "CompressedNftCollection",
+            "fields": [
+              "publicKey"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "Path",
       "type": {
         "kind": "enum",
@@ -766,6 +1111,11 @@
       "code": 6011,
       "name": "NumericalOverflow",
       "msg": "Numerical Overflow"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidIngredient",
+      "msg": "Not a valid Ingredient"
     }
   ],
   "metadata": {

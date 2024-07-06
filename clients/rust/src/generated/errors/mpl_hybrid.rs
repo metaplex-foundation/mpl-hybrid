@@ -46,6 +46,9 @@ pub enum MplHybridError {
     /// 6011 (0x177B) - Numerical Overflow
     #[error("Numerical Overflow")]
     NumericalOverflow,
+    /// 6012 (0x177C) - Not a valid Ingredient
+    #[error("Not a valid Ingredient")]
+    InvalidIngredient,
 }
 
 impl solana_program::program_error::PrintProgramError for MplHybridError {

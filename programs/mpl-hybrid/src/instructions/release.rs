@@ -128,7 +128,7 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         return Err(MplHybridError::InvalidCollection.into());
     }
 
-    //If the path is 0, we need to update the metadata onchain
+    //If the path has bit 0 set, we need to update the metadata onchain
     if Path::RerollMetadata.check(escrow.path) {
         //construct the captured uri
         let mut uri = escrow.uri.clone();

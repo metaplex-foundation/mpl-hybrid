@@ -59,6 +59,34 @@ kinobi.update(
                 recentBlockhashes: { defaultValue: k.publicKeyValueNode("SysvarS1otHashes111111111111111111111111111") },
                 feeSolAccount: { defaultValue: k.publicKeyValueNode("GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3") }
             }
+        },
+        depositCoreAssetV1: {
+            accounts: {
+                mplCore: { defaultValue: k.publicKeyValueNode("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d") },
+            }
+        },
+        depositSplTokenV1: {
+            accounts: {
+                recipeTokenAccount: { defaultValue: ataPdaDefault("mint", "recipe") },
+                userTokenAccount: { defaultValue: ataPdaDefault("mint", "payer") },
+                associatedTokenProgram: {
+                    defaultValue: k.publicKeyValueNode("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+                },
+            }
+        },
+        withdrawCoreAssetV1: {
+            accounts: {
+                mplCore: { defaultValue: k.publicKeyValueNode("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d") },
+            }
+        },
+        withdrawSplTokenV1: {
+            accounts: {
+                recipeTokenAccount: { defaultValue: ataPdaDefault("mint", "recipe") },
+                userTokenAccount: { defaultValue: ataPdaDefault("mint", "payer") },
+                associatedTokenProgram: {
+                    defaultValue: k.publicKeyValueNode("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+                },
+            }
         }
     })
 );

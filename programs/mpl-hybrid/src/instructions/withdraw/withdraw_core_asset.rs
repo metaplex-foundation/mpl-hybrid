@@ -10,15 +10,16 @@ use crate::{
     constants::MPL_CORE,
     error::MplHybridError,
     state::{IngredientTriggerPairV1, IngredientV1, RecipeChecklistV1, RecipeV1},
+    utils::assert_deposits_finished,
 };
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct WithdrawCoreAssetArgs {
+pub struct WithdrawCoreAssetV1Args {
     pub reversed: bool,
 }
 
 #[derive(Accounts)]
-pub struct WithdrawCoreAsset<'info> {
+pub struct WithdrawCoreAssetV1<'info> {
     /// CHECK: The PDA derivation is checked in the handler.
     #[account(mut)]
     pub recipe: Account<'info, RecipeV1>,
@@ -52,9 +53,9 @@ pub struct WithdrawCoreAsset<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn handle_withdraw_core_asset(
-    ctx: Context<WithdrawCoreAsset>,
-    args: WithdrawCoreAssetArgs,
+pub fn handle_withdraw_core_asset_v1(
+    ctx: Context<WithdrawCoreAssetV1>,
+    args: WithdrawCoreAssetV1Args,
 ) -> Result<()> {
     // Guards
     let mut seeds = vec!["escrow".as_bytes()]
@@ -75,14 +76,20 @@ pub fn handle_withdraw_core_asset(
 
     // Perform the side effects.
     let (ingredients, checks) = match args.reversed {
-        false => (
-            &ctx.accounts.recipe.outputs,
-            &mut ctx.accounts.checklist.outputs,
-        ),
-        true => (
-            &ctx.accounts.recipe.inputs,
-            &mut ctx.accounts.checklist.inputs,
-        ),
+        false => {
+            assert_deposits_finished(ctx.accounts.checklist.inputs.as_slice())?;
+            (
+                &ctx.accounts.recipe.outputs,
+                &mut ctx.accounts.checklist.outputs,
+            )
+        }
+        true => {
+            assert_deposits_finished(ctx.accounts.checklist.outputs.as_slice())?;
+            (
+                &ctx.accounts.recipe.inputs,
+                &mut ctx.accounts.checklist.inputs,
+            )
+        }
     };
 
     // We only fetch the Base assets because we only need to check the collection here.

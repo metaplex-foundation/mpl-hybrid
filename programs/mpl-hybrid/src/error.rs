@@ -28,4 +28,6 @@ pub enum MplHybridError {
     NumericalOverflow,
     #[msg("Not a valid Ingredient")]
     InvalidIngredient,
+    #[msg("Missing Input Deposit")]
+    MissingInputDeposit,
 }

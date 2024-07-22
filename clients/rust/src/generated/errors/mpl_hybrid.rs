@@ -49,6 +49,9 @@ pub enum MplHybridError {
     /// 6012 (0x177C) - Not a valid Ingredient
     #[error("Not a valid Ingredient")]
     InvalidIngredient,
+    /// 6013 (0x177D) - Missing Input Deposit
+    #[error("Missing Input Deposit")]
+    MissingInputDeposit,
 }
 
 impl solana_program::program_error::PrintProgramError for MplHybridError {

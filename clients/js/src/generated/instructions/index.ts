@@ -7,8 +7,16 @@
  */
 
 export * from './captureV1';
+export * from './createChecklistV1';
+export * from './createRecipeV1';
+export * from './depositCoreAssetV1';
+export * from './depositSolV1';
+export * from './depositSplTokenV1';
 export * from './initEscrowV1';
 export * from './initNftDataV1';
 export * from './releaseV1';
 export * from './updateEscrowV1';
 export * from './updateNewDataV1';
+export * from './withdrawCoreAssetV1';
+export * from './withdrawSolV1';
+export * from './withdrawSplTokenV1';

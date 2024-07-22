@@ -13,12 +13,12 @@ use crate::{
 };
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct DepositCoreAssetArgs {
+pub struct DepositCoreAssetV1Args {
     pub reversed: bool,
 }
 
 #[derive(Accounts)]
-pub struct DepositCoreAsset<'info> {
+pub struct DepositCoreAssetV1<'info> {
     /// CHECK: The PDA derivation is checked in the handler.
     #[account(mut)]
     pub recipe: Account<'info, RecipeV1>,
@@ -52,9 +52,9 @@ pub struct DepositCoreAsset<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn handle_deposit_core_asset(
-    ctx: Context<DepositCoreAsset>,
-    args: DepositCoreAssetArgs,
+pub fn handle_deposit_core_asset_v1(
+    ctx: Context<DepositCoreAssetV1>,
+    args: DepositCoreAssetV1Args,
 ) -> Result<()> {
     // Guards
     let mut seeds = vec!["escrow".as_bytes()]

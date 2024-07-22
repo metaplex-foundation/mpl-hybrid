@@ -6,15 +6,31 @@
 //!
 
 pub(crate) mod r#capture_v1;
+pub(crate) mod r#create_checklist_v1;
+pub(crate) mod r#create_recipe_v1;
+pub(crate) mod r#deposit_core_asset_v1;
+pub(crate) mod r#deposit_sol_v1;
+pub(crate) mod r#deposit_spl_token_v1;
 pub(crate) mod r#init_escrow_v1;
 pub(crate) mod r#init_nft_data_v1;
 pub(crate) mod r#release_v1;
 pub(crate) mod r#update_escrow_v1;
 pub(crate) mod r#update_new_data_v1;
+pub(crate) mod r#withdraw_core_asset_v1;
+pub(crate) mod r#withdraw_sol_v1;
+pub(crate) mod r#withdraw_spl_token_v1;
 
 pub use self::r#capture_v1::*;
+pub use self::r#create_checklist_v1::*;
+pub use self::r#create_recipe_v1::*;
+pub use self::r#deposit_core_asset_v1::*;
+pub use self::r#deposit_sol_v1::*;
+pub use self::r#deposit_spl_token_v1::*;
 pub use self::r#init_escrow_v1::*;
 pub use self::r#init_nft_data_v1::*;
 pub use self::r#release_v1::*;
 pub use self::r#update_escrow_v1::*;
 pub use self::r#update_new_data_v1::*;
+pub use self::r#withdraw_core_asset_v1::*;
+pub use self::r#withdraw_sol_v1::*;
+pub use self::r#withdraw_spl_token_v1::*;

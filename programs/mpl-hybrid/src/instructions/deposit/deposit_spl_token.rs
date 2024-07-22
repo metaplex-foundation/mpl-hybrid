@@ -12,12 +12,12 @@ use crate::{
 };
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct DepositSplTokenArgs {
+pub struct DepositSplTokenV1Args {
     pub reversed: bool,
 }
 
 #[derive(Accounts)]
-pub struct DepositSplToken<'info> {
+pub struct DepositSplTokenV1<'info> {
     /// CHECK: The PDA derivation is checked in the handler.
     #[account(mut)]
     pub recipe: Account<'info, RecipeV1>,
@@ -57,9 +57,9 @@ pub struct DepositSplToken<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handle_deposit_spl_token(
-    ctx: Context<DepositSplToken>,
-    args: DepositSplTokenArgs,
+pub fn handle_deposit_spl_token_v1(
+    ctx: Context<DepositSplTokenV1>,
+    args: DepositSplTokenV1Args,
 ) -> Result<()> {
     // Guards
     let mut seeds = vec!["escrow".as_bytes()]

@@ -187,6 +187,19 @@ export class InvalidIngredientError extends ProgramError {
 codeToErrorMap.set(0x177c, InvalidIngredientError);
 nameToErrorMap.set('InvalidIngredient', InvalidIngredientError);
 
+/** MissingInputDeposit: Missing Input Deposit */
+export class MissingInputDepositError extends ProgramError {
+  override readonly name: string = 'MissingInputDeposit';
+
+  readonly code: number = 0x177d; // 6013
+
+  constructor(program: Program, cause?: Error) {
+    super('Missing Input Deposit', program, cause);
+  }
+}
+codeToErrorMap.set(0x177d, MissingInputDepositError);
+nameToErrorMap.set('MissingInputDeposit', MissingInputDepositError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

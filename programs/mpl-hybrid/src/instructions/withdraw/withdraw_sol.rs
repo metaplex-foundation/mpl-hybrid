@@ -5,15 +5,16 @@ use solana_program::{program::invoke, system_instruction};
 use crate::{
     error::MplHybridError,
     state::{IngredientTriggerPairV1, IngredientV1, RecipeChecklistV1, RecipeV1},
+    utils::assert_deposits_finished,
 };
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct WithdrawSolArgs {
+pub struct WithdrawSolV1Args {
     pub reversed: bool,
 }
 
 #[derive(Accounts)]
-pub struct WithdrawSol<'info> {
+pub struct WithdrawSolV1<'info> {
     /// CHECK: The PDA derivation is checked in the handler.
     #[account(mut)]
     pub recipe: Account<'info, RecipeV1>,
@@ -35,7 +36,7 @@ pub struct WithdrawSol<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn handle_withdraw_sol(ctx: Context<WithdrawSol>, args: WithdrawSolArgs) -> Result<()> {
+pub fn handle_withdraw_sol_v1(ctx: Context<WithdrawSolV1>, args: WithdrawSolV1Args) -> Result<()> {
     // Guards
     let mut seeds = vec!["escrow".as_bytes()]
         .into_iter()
@@ -55,14 +56,20 @@ pub fn handle_withdraw_sol(ctx: Context<WithdrawSol>, args: WithdrawSolArgs) -> 
 
     // Perform the side effects.
     let (ingredients, checks) = match args.reversed {
-        false => (
-            &ctx.accounts.recipe.outputs,
-            &mut ctx.accounts.checklist.outputs,
-        ),
-        true => (
-            &ctx.accounts.recipe.inputs,
-            &mut ctx.accounts.checklist.inputs,
-        ),
+        false => {
+            assert_deposits_finished(ctx.accounts.checklist.inputs.as_slice())?;
+            (
+                &ctx.accounts.recipe.outputs,
+                &mut ctx.accounts.checklist.outputs,
+            )
+        }
+        true => {
+            assert_deposits_finished(ctx.accounts.checklist.outputs.as_slice())?;
+            (
+                &ctx.accounts.recipe.inputs,
+                &mut ctx.accounts.checklist.inputs,
+            )
+        }
     };
 
     let position = ingredients.iter().zip(checks.iter()).position(

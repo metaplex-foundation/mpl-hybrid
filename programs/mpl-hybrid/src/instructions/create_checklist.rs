@@ -4,7 +4,7 @@ use mpl_utils::assert_derivation_with_bump;
 use crate::state::{CheckPairV1, IngredientTriggerPairV1, RecipeChecklistV1, RecipeV1};
 
 #[derive(Accounts)]
-pub struct CreateChecklist<'info> {
+pub struct CreateChecklistV1<'info> {
     /// CHECK: The PDA derivation is checked in the handler.
     #[account(mut)]
     pub recipe: Account<'info, RecipeV1>,
@@ -12,7 +12,7 @@ pub struct CreateChecklist<'info> {
     #[account(
         init,
         payer = payer,
-        space = RecipeChecklistV1::BASE_LEN + recipe.inputs.len() + recipe.outputs.len(),
+        space = RecipeChecklistV1::BASE_LEN + recipe.inputs.len()*2 + recipe.outputs.len()*2,
         seeds = [
             "checklist".as_bytes(),
             recipe.key().as_ref(),
@@ -28,7 +28,7 @@ pub struct CreateChecklist<'info> {
     system_program: Program<'info, System>,
 }
 
-pub fn handle_create_checklist(ctx: Context<CreateChecklist>) -> Result<()> {
+pub fn handle_create_checklist_v1(ctx: Context<CreateChecklistV1>) -> Result<()> {
     let mut seeds = vec!["escrow".as_bytes()]
         .into_iter()
         .chain(ctx.accounts.recipe.get_input_keys())

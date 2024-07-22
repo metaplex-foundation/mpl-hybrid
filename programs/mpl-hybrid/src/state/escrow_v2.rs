@@ -52,8 +52,8 @@ pub enum IngredientV1 {
 impl IngredientV1 {
     pub fn get_key_seed(&self) -> Option<&[u8]> {
         match self {
-            IngredientV1::None => None,
-            IngredientV1::Sol(_) => None,
+            IngredientV1::None => Some("none".as_bytes()),
+            IngredientV1::Sol(_) => Some("sol".as_bytes()),
             IngredientV1::CoreAsset(key) => Some(key.as_ref()),
             IngredientV1::CoreCollection(key) => Some(key.as_ref()),
             IngredientV1::SplToken(key, _) => Some(key.as_ref()),

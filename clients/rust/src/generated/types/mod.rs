@@ -6,27 +6,13 @@
 //!
 
 pub(crate) mod r#check_pair_v1;
-pub(crate) mod r#create_recipe_args;
-pub(crate) mod r#deposit_core_asset_args;
-pub(crate) mod r#deposit_sol_args;
-pub(crate) mod r#deposit_spl_token_args;
 pub(crate) mod r#ingredient_trigger_pair_v1;
 pub(crate) mod r#ingredient_v1;
 pub(crate) mod r#path;
 pub(crate) mod r#trigger_v1;
-pub(crate) mod r#withdraw_core_asset_args;
-pub(crate) mod r#withdraw_sol_args;
-pub(crate) mod r#withdraw_spl_token_args;
 
 pub use self::r#check_pair_v1::*;
-pub use self::r#create_recipe_args::*;
-pub use self::r#deposit_core_asset_args::*;
-pub use self::r#deposit_sol_args::*;
-pub use self::r#deposit_spl_token_args::*;
 pub use self::r#ingredient_trigger_pair_v1::*;
 pub use self::r#ingredient_v1::*;
 pub use self::r#path::*;
 pub use self::r#trigger_v1::*;
-pub use self::r#withdraw_core_asset_args::*;
-pub use self::r#withdraw_sol_args::*;
-pub use self::r#withdraw_spl_token_args::*;

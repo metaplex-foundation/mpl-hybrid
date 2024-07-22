@@ -373,6 +373,338 @@
           }
         }
       ]
+    },
+    {
+      "name": "createRecipeV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "CreateRecipeV1Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "createChecklistV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "checklist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "depositCoreAssetV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "checklist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "asset",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mplCore",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "DepositCoreAssetV1Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "depositSolV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "checklist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "DepositSolV1Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "depositSplTokenV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "checklist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "recipeTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "DepositSplTokenV1Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdrawCoreAssetV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "checklist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "asset",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mplCore",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "WithdrawCoreAssetV1Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdrawSolV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "checklist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "WithdrawSolV1Args"
+          }
+        }
+      ]
+    },
+    {
+      "name": "withdrawSplTokenV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "checklist",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "recipeTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": "WithdrawSplTokenV1Args"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
@@ -571,7 +903,7 @@
   ],
   "types": [
     {
-      "name": "CreateRecipeArgs",
+      "name": "CreateRecipeV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -599,7 +931,7 @@
       }
     },
     {
-      "name": "DepositCoreAssetArgs",
+      "name": "DepositCoreAssetV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -611,7 +943,7 @@
       }
     },
     {
-      "name": "DepositSolArgs",
+      "name": "DepositSolV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -623,7 +955,7 @@
       }
     },
     {
-      "name": "DepositSplTokenArgs",
+      "name": "DepositSplTokenV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -827,7 +1159,7 @@
       }
     },
     {
-      "name": "WithdrawCoreAssetArgs",
+      "name": "WithdrawCoreAssetV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -839,7 +1171,7 @@
       }
     },
     {
-      "name": "WithdrawSolArgs",
+      "name": "WithdrawSolV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -851,7 +1183,7 @@
       }
     },
     {
-      "name": "WithdrawSplTokenArgs",
+      "name": "WithdrawSplTokenV1Args",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1116,6 +1448,11 @@
       "code": 6012,
       "name": "InvalidIngredient",
       "msg": "Not a valid Ingredient"
+    },
+    {
+      "code": 6013,
+      "name": "MissingInputDeposit",
+      "msg": "Missing Input Deposit"
     }
   ],
   "metadata": {

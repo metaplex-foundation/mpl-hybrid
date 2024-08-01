@@ -92,7 +92,7 @@ pub struct CaptureV1Ctx<'info> {
 
     /// CHECK: We check against constant
     #[account(
-        address = MPL_CORE @ MplHybridError::InvalidMplCore
+        address = mpl_core::ID @ MplHybridError::InvalidMplCore
     )]
     mpl_core: AccountInfo<'info>,
 

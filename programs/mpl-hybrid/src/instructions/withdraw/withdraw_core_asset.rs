@@ -7,7 +7,6 @@ use mpl_core::{
 use mpl_utils::assert_derivation_with_bump;
 
 use crate::{
-    constants::MPL_CORE,
     error::MplHybridError,
     state::{IngredientTriggerPairV1, IngredientV1, RecipeChecklistV1, RecipeV1},
     utils::assert_deposits_finished,
@@ -47,7 +46,7 @@ pub struct WithdrawCoreAssetV1<'info> {
 
     /// CHECK: We check against constant
     #[account(
-        address = MPL_CORE @ MplHybridError::InvalidMplCore
+        address = mpl_core::ID @ MplHybridError::InvalidMplCore
     )]
     mpl_core: AccountInfo<'info>,
     system_program: Program<'info, System>,

@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{Mint, Token, TokenAccount},
+    token_interface::{Mint, TokenAccount, TokenInterface},
 };
 use mpl_utils::assert_derivation_with_bump;
 use solana_program::program::invoke;
@@ -37,22 +37,22 @@ pub struct DepositSplTokenV1<'info> {
         associated_token::mint = mint,
         associated_token::authority = payer
     )]
-    pub user_token_account: Account<'info, TokenAccount>,
+    pub user_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(init_if_needed,
         payer = payer,
         associated_token::mint = mint,
         associated_token::authority = recipe
     )]
-    pub recipe_token_account: Account<'info, TokenAccount>,
+    pub recipe_token_account: InterfaceAccount<'info, TokenAccount>,
 
     /// CHECK: This account is checked in the handler.
-    pub mint: Account<'info, Mint>,
+    pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(mut)]
     pub payer: Signer<'info>,
 
-    pub token_program: Program<'info, Token>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }

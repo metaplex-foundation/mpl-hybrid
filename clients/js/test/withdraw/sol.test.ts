@@ -18,7 +18,7 @@ import {
 } from "../../src";
 import { createUmi } from "../_setup";
 
-test("it can deposit sol", async (t) => {
+test("it can withdraw sol", async (t) => {
     const umi = await createUmi();
     const payer = await generateSignerWithSol(umi);
     const tokenMint = generateSigner(umi);

@@ -1,4 +1,3 @@
-use crate::constants::MPL_CORE;
 use crate::error::MplHybridError;
 use crate::state::*;
 use anchor_lang::{prelude::*, Discriminator};
@@ -78,7 +77,8 @@ pub fn handler_init_nft_data_v1(ctx: Context<InitNftDataV1Ctx>, ix: InitNftDataV
     }
 
     // Check that a valid asset has been passed in.
-    if *asset.owner != MPL_CORE || load_key(&asset.to_account_info(), 0)? != MplCoreKey::AssetV1 {
+    if *asset.owner != mpl_core::ID || load_key(&asset.to_account_info(), 0)? != MplCoreKey::AssetV1
+    {
         return Err(MplHybridError::InvalidAssetAccount.into());
     }
 
@@ -90,7 +90,7 @@ pub fn handler_init_nft_data_v1(ctx: Context<InitNftDataV1Ctx>, ix: InitNftDataV
     }
 
     // Check that a valid collection has been passed in.
-    if *collection.owner != MPL_CORE
+    if *collection.owner != mpl_core::ID
         || load_key(&collection.to_account_info(), 0)? != MplCoreKey::CollectionV1
     {
         return Err(MplHybridError::InvalidCollectionAccount.into());

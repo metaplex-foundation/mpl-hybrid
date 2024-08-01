@@ -30,4 +30,8 @@ pub enum MplHybridError {
     InvalidIngredient,
     #[msg("Missing Input Deposit")]
     MissingInputDeposit,
+    #[msg("Invalid Instructions Sysvar address")]
+    InvalidInstructionsSysvarAddress,
+    #[msg("Invalid Token Metadata Program")]
+    InvalidTokenMetadataProgram,
 }

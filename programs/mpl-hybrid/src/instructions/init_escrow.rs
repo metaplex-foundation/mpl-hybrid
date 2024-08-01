@@ -1,4 +1,3 @@
-use crate::constants::MPL_CORE;
 use crate::error::MplHybridError;
 use crate::state::*;
 use anchor_lang::{prelude::*, Discriminator};
@@ -86,7 +85,7 @@ pub fn handler_init_escrow_v1(ctx: Context<InitEscrowV1Ctx>, ix: InitEscrowV1Ix)
         return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
     }
 
-    if *collection.owner != MPL_CORE
+    if *collection.owner != mpl_core::ID
         || load_key(&collection.to_account_info(), 0)? != MplCoreKey::CollectionV1
     {
         return Err(MplHybridError::InvalidCollectionAccount.into());

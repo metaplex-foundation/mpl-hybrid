@@ -34,14 +34,14 @@ pub struct WithdrawSplTokenV1<'info> {
     )]
     pub checklist: Account<'info, RecipeChecklistV1>,
 
-    #[account(mut,
+    #[account(init_if_needed,
+        payer = payer,
         associated_token::mint = mint,
         associated_token::authority = payer
     )]
     pub user_token_account: Account<'info, TokenAccount>,
 
-    #[account(init_if_needed,
-        payer = payer,
+    #[account(mut,
         associated_token::mint = mint,
         associated_token::authority = recipe
     )]

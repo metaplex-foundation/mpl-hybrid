@@ -7,7 +7,6 @@ use mpl_core::{
 use mpl_utils::assert_derivation_with_bump;
 
 use crate::{
-    constants::MPL_CORE,
     error::MplHybridError,
     state::{IngredientTriggerPairV1, IngredientV1, RecipeChecklistV1, RecipeV1},
 };
@@ -46,7 +45,7 @@ pub struct DepositCoreAssetV1<'info> {
 
     /// CHECK: We check against constant
     #[account(
-        address = MPL_CORE @ MplHybridError::InvalidMplCore
+        address = mpl_core::ID @ MplHybridError::InvalidMplCore
     )]
     mpl_core: AccountInfo<'info>,
     system_program: Program<'info, System>,
@@ -99,7 +98,7 @@ pub fn handle_deposit_core_asset_v1(
                 checked,
             )| {
                 !checked.ingredient_checked
-                    && matches!(ingredient, IngredientV1::CoreCollection(collection) if *collection == core_collection)
+                    && (matches!(ingredient, IngredientV1::CoreCollection(collection) if *collection == core_collection) || matches!(ingredient, IngredientV1::CoreAsset(asset) if *asset == ctx.accounts.asset.key()))
             },
         )
     } else {

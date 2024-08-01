@@ -84,4 +84,15 @@ pub mod mpl_hybrid {
     ) -> Result<()> {
         withdraw_spl_token::handle_withdraw_spl_token_v1(ctx, args)
     }
+
+    pub fn deposit_tm_nft_v1(ctx: Context<DepositTmNftV1>, args: DepositTmNftV1Args) -> Result<()> {
+        deposit_tm_nft::handle_deposit_tm_nft_v1(ctx.into(), args)
+    }
+
+    pub fn deposit_tm_pnft_v1(
+        ctx: Context<DepositTmPNftV1>,
+        args: DepositTmNftV1Args,
+    ) -> Result<()> {
+        deposit_tm_nft::handle_deposit_tm_pnft_v1(ctx, args)
+    }
 }

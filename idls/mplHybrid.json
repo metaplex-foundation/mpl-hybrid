@@ -773,6 +773,34 @@
       }
     },
     {
+      "name": "RecipeChecklistV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "inputs",
+            "type": {
+              "vec": {
+                "defined": "CheckPairV1"
+              }
+            }
+          },
+          {
+            "name": "outputs",
+            "type": {
+              "vec": {
+                "defined": "CheckPairV1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "RecipeV1",
       "type": {
         "kind": "struct",
@@ -806,34 +834,6 @@
             "type": {
               "vec": {
                 "defined": "IngredientTriggerPairV1"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "RecipeChecklistV1",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "inputs",
-            "type": {
-              "vec": {
-                "defined": "CheckPairV1"
-              }
-            }
-          },
-          {
-            "name": "outputs",
-            "type": {
-              "vec": {
-                "defined": "CheckPairV1"
               }
             }
           }
@@ -1231,68 +1231,6 @@
       }
     },
     {
-      "name": "TriggerV1",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "None"
-          },
-          {
-            "name": "Rename",
-            "fields": [
-              {
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "name": "uri",
-                "type": "string"
-              },
-              {
-                "name": "max",
-                "type": "u32"
-              },
-              {
-                "name": "min",
-                "type": "u32"
-              }
-            ]
-          },
-          {
-            "name": "SolFee",
-            "fields": [
-              {
-                "name": "amount",
-                "type": "u64"
-              },
-              {
-                "name": "feeAccount",
-                "type": "publicKey"
-              }
-            ]
-          },
-          {
-            "name": "TokenFee",
-            "fields": [
-              {
-                "name": "amount",
-                "type": "u64"
-              },
-              {
-                "name": "feeAccount",
-                "type": "publicKey"
-              },
-              {
-                "name": "feeTokenAccount",
-                "type": "publicKey"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
       "name": "IngredientV1",
       "type": {
         "kind": "enum",
@@ -1366,6 +1304,68 @@
             "name": "CompressedNftCollection",
             "fields": [
               "publicKey"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "TriggerV1",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Rename",
+            "fields": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "uri",
+                "type": "string"
+              },
+              {
+                "name": "max",
+                "type": "u32"
+              },
+              {
+                "name": "min",
+                "type": "u32"
+              }
+            ]
+          },
+          {
+            "name": "SolFee",
+            "fields": [
+              {
+                "name": "amount",
+                "type": "u64"
+              },
+              {
+                "name": "feeAccount",
+                "type": "publicKey"
+              }
+            ]
+          },
+          {
+            "name": "TokenFee",
+            "fields": [
+              {
+                "name": "amount",
+                "type": "u64"
+              },
+              {
+                "name": "feeAccount",
+                "type": "publicKey"
+              },
+              {
+                "name": "feeTokenAccount",
+                "type": "publicKey"
+              }
             ]
           }
         ]

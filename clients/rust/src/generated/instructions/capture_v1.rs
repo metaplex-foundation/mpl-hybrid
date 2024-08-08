@@ -60,7 +60,7 @@ impl CaptureV1 {
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.authority,
-            true,
+            false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.escrow,
@@ -146,7 +146,7 @@ impl CaptureV1InstructionData {
 /// ### Accounts:
 ///
 ///   0. `[writable, signer]` owner
-///   1. `[writable, signer]` authority
+///   1. `[writable]` authority
 ///   2. `[writable]` escrow
 ///   3. `[writable]` asset
 ///   4. `[writable]` collection
@@ -494,7 +494,7 @@ impl<'a, 'b> CaptureV1Cpi<'a, 'b> {
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.authority.key,
-            true,
+            false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.escrow.key,
@@ -601,7 +601,7 @@ impl<'a, 'b> CaptureV1Cpi<'a, 'b> {
 /// ### Accounts:
 ///
 ///   0. `[writable, signer]` owner
-///   1. `[writable, signer]` authority
+///   1. `[writable]` authority
 ///   2. `[writable]` escrow
 ///   3. `[writable]` asset
 ///   4. `[writable]` collection

@@ -33,7 +33,7 @@ import {
 // Accounts.
 export type CaptureV1InstructionAccounts = {
   owner: Signer;
-  authority?: Signer;
+  authority?: PublicKey | Pda;
   escrow: PublicKey | Pda;
   asset: PublicKey | Pda;
   collection: PublicKey | Pda;
@@ -172,7 +172,7 @@ export function captureV1(
 
   // Default values.
   if (!resolvedAccounts.authority.value) {
-    resolvedAccounts.authority.value = context.identity;
+    resolvedAccounts.authority.value = context.identity.publicKey;
   }
   if (!resolvedAccounts.userTokenAccount.value) {
     resolvedAccounts.userTokenAccount.value = findAssociatedTokenPda(context, {

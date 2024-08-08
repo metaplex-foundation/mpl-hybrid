@@ -122,7 +122,7 @@
         {
           "name": "authority",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "escrow",
@@ -208,7 +208,7 @@
         {
           "name": "authority",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "escrow",
@@ -766,6 +766,11 @@
       "code": 6011,
       "name": "NumericalOverflow",
       "msg": "Numerical Overflow"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidUpdateAuthority",
+      "msg": "Invalid Update Authority"
     }
   ],
   "metadata": {

@@ -33,7 +33,7 @@ import {
 // Accounts.
 export type ReleaseV1InstructionAccounts = {
   owner: Signer;
-  authority?: PublicKey | Pda;
+  authority?: PublicKey | Pda | Signer;
   escrow: PublicKey | Pda;
   asset: PublicKey | Pda;
   collection: PublicKey | Pda;
@@ -172,7 +172,7 @@ export function releaseV1(
 
   // Default values.
   if (!resolvedAccounts.authority.value) {
-    resolvedAccounts.authority.value = context.identity.publicKey;
+    resolvedAccounts.authority.value = context.identity;
   }
   if (!resolvedAccounts.userTokenAccount.value) {
     resolvedAccounts.userTokenAccount.value = findAssociatedTokenPda(context, {

@@ -36,6 +36,7 @@ kinobi.update(
         },
         captureV1: {
             accounts: {
+                authority: { isSigner: 'either' },
                 feeTokenAccount: { defaultValue: ataPdaDefault("token", "feeProjectAccount") },
                 escrowTokenAccount: { defaultValue: ataPdaDefault("token", "escrow") },
                 userTokenAccount: { defaultValue: ataPdaDefault("token", "owner") },
@@ -49,6 +50,7 @@ kinobi.update(
         },
         releaseV1: {
             accounts: {
+                authority: { isSigner: 'either' },
                 feeTokenAccount: { defaultValue: ataPdaDefault("token", "feeProjectAccount") },
                 escrowTokenAccount: { defaultValue: ataPdaDefault("token", "escrow") },
                 userTokenAccount: { defaultValue: ataPdaDefault("token", "owner") },

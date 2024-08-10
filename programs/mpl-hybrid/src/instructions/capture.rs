@@ -118,10 +118,6 @@ pub fn handler_capture_v1(ctx: Context<CaptureV1Ctx>) -> Result<()> {
     let system_program = &mut ctx.accounts.system_program;
     let token_program = &mut ctx.accounts.token_program;
 
-    let recent_slothashes = &ctx.accounts.recent_blockhashes;
-    let data = recent_slothashes.data.borrow();
-    let most_recent = array_ref![data, 12, 8];
-
     let collection_info = &collection.to_account_info();
     let authority_info = &authority.to_account_info();
     let escrow_info = &escrow.to_account_info();
@@ -138,12 +134,19 @@ pub fn handler_capture_v1(ctx: Context<CaptureV1Ctx>) -> Result<()> {
         assert_signer(&ctx.accounts.authority)?;
     }
 
-    //If the path is 0, we need to update the metadata onchain
+    //If the path has bit 0 set, we need to update the metadata onchain
     if Path::RerollMetadata.check(escrow.path) {
         let clock = Clock::get()?;
         // seed for the random number is a combination of the slot_hash - timestamp
-        let seed = u64::from_le_bytes(*most_recent).saturating_sub(clock.unix_timestamp as u64)
-            * escrow.count;
+        let recent_slothashes = &ctx.accounts.recent_blockhashes;
+        let data = recent_slothashes.data.borrow();
+        let most_recent = array_ref![data, 12, 8];
+
+        let initial_seed =
+            u64::from_le_bytes(*most_recent).saturating_sub(clock.unix_timestamp as u64);
+        let seed = initial_seed
+            .checked_mul(escrow.count)
+            .unwrap_or(initial_seed);
         // remainder is the random number between the min and max
         let remainder = seed
             .checked_rem(escrow.max - escrow.min)

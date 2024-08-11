@@ -33,7 +33,7 @@ import {
 // Accounts.
 export type CaptureV1InstructionAccounts = {
   owner: Signer;
-  authority?: Signer;
+  authority?: PublicKey | Pda | Signer;
   escrow: PublicKey | Pda;
   asset: PublicKey | Pda;
   collection: PublicKey | Pda;

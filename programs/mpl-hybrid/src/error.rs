@@ -26,4 +26,6 @@ pub enum MplHybridError {
     InvalidMintAccount,
     #[msg("Numerical Overflow")]
     NumericalOverflow,
+    #[msg("Invalid Update Authority")]
+    InvalidUpdateAuthority,
 }

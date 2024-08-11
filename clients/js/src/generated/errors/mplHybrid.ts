@@ -174,6 +174,19 @@ export class NumericalOverflowError extends ProgramError {
 codeToErrorMap.set(0x177b, NumericalOverflowError);
 nameToErrorMap.set('NumericalOverflow', NumericalOverflowError);
 
+/** InvalidUpdateAuthority: Invalid Update Authority */
+export class InvalidUpdateAuthorityError extends ProgramError {
+  override readonly name: string = 'InvalidUpdateAuthority';
+
+  readonly code: number = 0x177c; // 6012
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Update Authority', program, cause);
+  }
+}
+codeToErrorMap.set(0x177c, InvalidUpdateAuthorityError);
+nameToErrorMap.set('InvalidUpdateAuthority', InvalidUpdateAuthorityError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

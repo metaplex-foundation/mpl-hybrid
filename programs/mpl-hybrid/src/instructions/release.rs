@@ -15,6 +15,7 @@ use mpl_core::instructions::{
     TransferV1Cpi, TransferV1InstructionArgs, UpdateV1Cpi, UpdateV1InstructionArgs,
 };
 use mpl_core::types::UpdateAuthority;
+use mpl_utils::assert_signer;
 use solana_program::program::invoke;
 
 #[derive(Accounts)]
@@ -22,8 +23,9 @@ pub struct ReleaseV1Ctx<'info> {
     #[account(mut)]
     owner: Signer<'info>,
 
+    /// CHECK: Optional signer, which we check in the handler.
     #[account(mut)]
-    authority: Signer<'info>,
+    authority: AccountInfo<'info>,
 
     #[account(
         mut,
@@ -128,6 +130,10 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         return Err(MplHybridError::InvalidCollection.into());
     }
 
+    if authority_info.key == &escrow.authority {
+        assert_signer(&ctx.accounts.authority)?;
+    }
+
     //If the path has bit 0 set, we need to update the metadata onchain
     if Path::RerollMetadata.check(escrow.path) {
         //construct the captured uri
@@ -154,8 +160,15 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
             },
         };
 
-        //invoke the update instruction
-        let _update_result = update_ix.invoke();
+        if authority_info.key == &escrow.authority {
+            //invoke the update instruction
+            update_ix.invoke()?;
+        } else if authority_info.key == &escrow.key() {
+            // The auth has been delegated as the UpdateDelegate on the asset.
+            update_ix.invoke_signed(&[&[b"escrow", collection.key.as_ref(), &[escrow.bump]]])?;
+        } else {
+            return Err(MplHybridError::InvalidUpdateAuthority.into());
+        }
     }
 
     //create transfer instruction

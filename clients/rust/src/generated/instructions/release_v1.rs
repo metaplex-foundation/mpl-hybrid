@@ -14,7 +14,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 pub struct ReleaseV1 {
     pub owner: solana_program::pubkey::Pubkey,
 
-    pub authority: solana_program::pubkey::Pubkey,
+    pub authority: (solana_program::pubkey::Pubkey, bool),
 
     pub escrow: solana_program::pubkey::Pubkey,
 
@@ -59,8 +59,8 @@ impl ReleaseV1 {
             self.owner, true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            self.authority,
-            true,
+            self.authority.0,
+            self.authority.1,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.escrow,
@@ -164,7 +164,7 @@ impl ReleaseV1InstructionData {
 #[derive(Default)]
 pub struct ReleaseV1Builder {
     owner: Option<solana_program::pubkey::Pubkey>,
-    authority: Option<solana_program::pubkey::Pubkey>,
+    authority: Option<(solana_program::pubkey::Pubkey, bool)>,
     escrow: Option<solana_program::pubkey::Pubkey>,
     asset: Option<solana_program::pubkey::Pubkey>,
     collection: Option<solana_program::pubkey::Pubkey>,
@@ -192,8 +192,12 @@ impl ReleaseV1Builder {
         self
     }
     #[inline(always)]
-    pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.authority = Some(authority);
+    pub fn authority(
+        &mut self,
+        authority: solana_program::pubkey::Pubkey,
+        as_signer: bool,
+    ) -> &mut Self {
+        self.authority = Some((authority, as_signer));
         self
     }
     #[inline(always)]
@@ -360,7 +364,7 @@ impl ReleaseV1Builder {
 pub struct ReleaseV1CpiAccounts<'a, 'b> {
     pub owner: &'b solana_program::account_info::AccountInfo<'a>,
 
-    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
+    pub authority: (&'b solana_program::account_info::AccountInfo<'a>, bool),
 
     pub escrow: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -398,7 +402,7 @@ pub struct ReleaseV1Cpi<'a, 'b> {
 
     pub owner: &'b solana_program::account_info::AccountInfo<'a>,
 
-    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
+    pub authority: (&'b solana_program::account_info::AccountInfo<'a>, bool),
 
     pub escrow: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -493,8 +497,8 @@ impl<'a, 'b> ReleaseV1Cpi<'a, 'b> {
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.authority.key,
-            true,
+            *self.authority.0.key,
+            self.authority.1,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.escrow.key,
@@ -569,7 +573,7 @@ impl<'a, 'b> ReleaseV1Cpi<'a, 'b> {
         let mut account_infos = Vec::with_capacity(16 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.owner.clone());
-        account_infos.push(self.authority.clone());
+        account_infos.push(self.authority.0.clone());
         account_infos.push(self.escrow.clone());
         account_infos.push(self.asset.clone());
         account_infos.push(self.collection.clone());
@@ -653,8 +657,9 @@ impl<'a, 'b> ReleaseV1CpiBuilder<'a, 'b> {
     pub fn authority(
         &mut self,
         authority: &'b solana_program::account_info::AccountInfo<'a>,
+        as_signer: bool,
     ) -> &mut Self {
-        self.instruction.authority = Some(authority);
+        self.instruction.authority = Some((authority, as_signer));
         self
     }
     #[inline(always)]
@@ -876,7 +881,7 @@ impl<'a, 'b> ReleaseV1CpiBuilder<'a, 'b> {
 struct ReleaseV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     owner: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    authority: Option<(&'b solana_program::account_info::AccountInfo<'a>, bool)>,
     escrow: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     collection: Option<&'b solana_program::account_info::AccountInfo<'a>>,

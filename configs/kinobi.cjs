@@ -7,7 +7,7 @@ const idlDir = path.join(__dirname, "..", "idls");
 
 // Instantiate Kinobi.
 const kinobi = k.createFromIdls([
-    path.join(idlDir, "mplHybrid.json"),
+    path.join(idlDir, "mpl_hybrid.json"),
 ]);
 
 // Update programs.

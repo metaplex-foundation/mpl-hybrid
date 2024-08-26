@@ -10,7 +10,7 @@ generateIdl({
     programName: "mpl_hybrid",
     programId: "MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb",
     idlDir,
-    idlName: "mplHybrid",
+    idlName: "mpl_hybrid",
     binaryInstallDir,
     programDir: path.join(programDir, "mpl-hybrid"),
     rustbin: {

@@ -140,7 +140,7 @@ jobs:
           echo ${{ secrets.HYBRID_DEPLOYER_KEY }} > ./deployer-key.json 
           echo ${{ secrets.HYBRID_ID }} > ./program-id.json
 
-          solana -v program deploy ./programs/.bin/mpl_${{ inputs.program }}_program.so \
+          solana -v program deploy ./programs/.bin/mpl_${{ inputs.program }}.so \
             -u ${{ env.RPC }} \
             --program-id ./program-id.json \
             -k ./deployer-key.json \

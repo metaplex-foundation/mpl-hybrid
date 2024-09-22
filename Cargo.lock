@@ -2512,6 +2512,7 @@ dependencies = [
  "mpl-utils",
  "proptest",
  "solana-program",
+ "spl-associated-token-account",
  "spl-token 3.5.0",
  "spl-token-2022 1.0.0",
  "spl-token-metadata-interface",

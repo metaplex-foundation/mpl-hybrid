@@ -771,6 +771,21 @@
       "code": 6012,
       "name": "InvalidUpdateAuthority",
       "msg": "Invalid Update Authority"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidTokenAccount",
+      "msg": "Invalid Token Account"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidTokenAccountOwner",
+      "msg": "Invalid Token Account Owner"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidTokenAccountMint",
+      "msg": "Invalid Token Account Mint"
     }
   ],
   "metadata": {

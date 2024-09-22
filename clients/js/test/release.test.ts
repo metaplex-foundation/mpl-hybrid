@@ -2,6 +2,7 @@ import test from 'ava';
 import { generateSigner, publicKey } from '@metaplex-foundation/umi';
 import {
   createFungible,
+  fetchDigitalAssetWithAssociatedToken,
   mintV1,
   TokenStandard,
 } from '@metaplex-foundation/mpl-token-metadata';
@@ -9,7 +10,7 @@ import {
   string,
   publicKey as publicKeySerializer,
 } from '@metaplex-foundation/umi/serializers';
-import { addCollectionPlugin } from '@metaplex-foundation/mpl-core';
+import { addCollectionPlugin, fetchAsset } from '@metaplex-foundation/mpl-core';
 import {
   EscrowV1,
   fetchEscrowV1,
@@ -83,6 +84,17 @@ test('it can swap an asset for tokens', async (t) => {
     solFeeAmount: 1_000_000n,
   });
 
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  t.deepEqual(escrowTokenBefore.token.amount, 1000n);
+  try {
+    await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+    t.fail('User token account should not exist');
+  } catch (e) {
+    t.is(e.name, 'AccountNotFoundError');
+  }
+
+  t.is(assets[0].owner, umi.identity.publicKey);
+
   await releaseV1(umi, {
     owner: umi.identity,
     escrow,
@@ -91,6 +103,13 @@ test('it can swap an asset for tokens', async (t) => {
     feeProjectAccount: escrowData.feeLocation,
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
+
+  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  t.deepEqual(escrowTokenAfter.token.amount, 995n);
+  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+  t.deepEqual(userTokenAfter.token.amount, 5n);
+  const assetAfter = await fetchAsset(umi, assets[0].publicKey);
+  t.is(assetAfter.owner, publicKey(escrow));
 });
 
 test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
@@ -167,6 +186,17 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
     solFeeAmount: 1_000_000n,
   });
 
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  t.deepEqual(escrowTokenBefore.token.amount, 1000n);
+  try {
+    await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+    t.fail('User token account should not exist');
+  } catch (e) {
+    t.is(e.name, 'AccountNotFoundError');
+  }
+
+  t.is(assets[0].owner, umi.identity.publicKey);
+
   await releaseV1(umi, {
     owner: umi.identity,
     authority: escrow,
@@ -176,4 +206,11 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
     feeProjectAccount: escrowData.feeLocation,
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
+
+  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  t.deepEqual(escrowTokenAfter.token.amount, 995n);
+  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+  t.deepEqual(userTokenAfter.token.amount, 5n);
+  const assetAfter = await fetchAsset(umi, assets[0].publicKey);
+  t.is(assetAfter.owner, publicKey(escrow));
 });

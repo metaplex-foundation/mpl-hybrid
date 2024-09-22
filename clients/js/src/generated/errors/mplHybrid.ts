@@ -187,6 +187,45 @@ export class InvalidUpdateAuthorityError extends ProgramError {
 codeToErrorMap.set(0x177c, InvalidUpdateAuthorityError);
 nameToErrorMap.set('InvalidUpdateAuthority', InvalidUpdateAuthorityError);
 
+/** InvalidTokenAccount: Invalid Token Account */
+export class InvalidTokenAccountError extends ProgramError {
+  override readonly name: string = 'InvalidTokenAccount';
+
+  readonly code: number = 0x177d; // 6013
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Token Account', program, cause);
+  }
+}
+codeToErrorMap.set(0x177d, InvalidTokenAccountError);
+nameToErrorMap.set('InvalidTokenAccount', InvalidTokenAccountError);
+
+/** InvalidTokenAccountOwner: Invalid Token Account Owner */
+export class InvalidTokenAccountOwnerError extends ProgramError {
+  override readonly name: string = 'InvalidTokenAccountOwner';
+
+  readonly code: number = 0x177e; // 6014
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Token Account Owner', program, cause);
+  }
+}
+codeToErrorMap.set(0x177e, InvalidTokenAccountOwnerError);
+nameToErrorMap.set('InvalidTokenAccountOwner', InvalidTokenAccountOwnerError);
+
+/** InvalidTokenAccountMint: Invalid Token Account Mint */
+export class InvalidTokenAccountMintError extends ProgramError {
+  override readonly name: string = 'InvalidTokenAccountMint';
+
+  readonly code: number = 0x177f; // 6015
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Token Account Mint', program, cause);
+  }
+}
+codeToErrorMap.set(0x177f, InvalidTokenAccountMintError);
+nameToErrorMap.set('InvalidTokenAccountMint', InvalidTokenAccountMintError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

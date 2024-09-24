@@ -68,4 +68,5 @@ jobs:
           name: rust-client-builds
           # First wildcard ensures exported paths are consistently under the clients folder.
           path: ./targe*/release/*mpl_hybrid*
+          include-hidden-files: true
           if-no-files-found: error

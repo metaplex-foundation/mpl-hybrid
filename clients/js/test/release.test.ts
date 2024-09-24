@@ -84,10 +84,18 @@ test('it can swap an asset for tokens', async (t) => {
     solFeeAmount: 1_000_000n,
   });
 
-  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
   t.deepEqual(escrowTokenBefore.token.amount, 1000n);
   try {
-    await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+    await fetchDigitalAssetWithAssociatedToken(
+      umi,
+      tokenMint.publicKey,
+      umi.identity.publicKey
+    );
     t.fail('User token account should not exist');
   } catch (e) {
     t.is(e.name, 'AccountNotFoundError');
@@ -104,9 +112,17 @@ test('it can swap an asset for tokens', async (t) => {
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
 
-  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
   t.deepEqual(escrowTokenAfter.token.amount, 995n);
-  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    umi.identity.publicKey
+  );
   t.deepEqual(userTokenAfter.token.amount, 5n);
   const assetAfter = await fetchAsset(umi, assets[0].publicKey);
   t.is(assetAfter.owner, publicKey(escrow));
@@ -186,10 +202,18 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
     solFeeAmount: 1_000_000n,
   });
 
-  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
   t.deepEqual(escrowTokenBefore.token.amount, 1000n);
   try {
-    await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+    await fetchDigitalAssetWithAssociatedToken(
+      umi,
+      tokenMint.publicKey,
+      umi.identity.publicKey
+    );
     t.fail('User token account should not exist');
   } catch (e) {
     t.is(e.name, 'AccountNotFoundError');
@@ -207,9 +231,17 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
 
-  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
   t.deepEqual(escrowTokenAfter.token.amount, 995n);
-  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    umi.identity.publicKey
+  );
   t.deepEqual(userTokenAfter.token.amount, 5n);
   const assetAfter = await fetchAsset(umi, assets[0].publicKey);
   t.is(assetAfter.owner, publicKey(escrow));

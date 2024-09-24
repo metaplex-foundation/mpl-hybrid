@@ -10,7 +10,11 @@ import {
   string,
   publicKey as publicKeySerializer,
 } from '@metaplex-foundation/umi/serializers';
-import { addCollectionPlugin, fetchAsset, transfer } from '@metaplex-foundation/mpl-core';
+import {
+  addCollectionPlugin,
+  fetchAsset,
+  transfer,
+} from '@metaplex-foundation/mpl-core';
 import {
   captureV1,
   EscrowV1,
@@ -95,10 +99,18 @@ test('it can swap tokens for an asset', async (t) => {
     solFeeAmount: 1_000_000n,
   });
 
-  const userTokenBefore = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+  const userTokenBefore = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    umi.identity.publicKey
+  );
   t.deepEqual(userTokenBefore.token.amount, 1000n);
   try {
-    await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+    await fetchDigitalAssetWithAssociatedToken(
+      umi,
+      tokenMint.publicKey,
+      publicKey(escrow)
+    );
     t.fail('Escrow token account should not exist');
   } catch (e) {
     t.is(e.name, 'AccountNotFoundError');
@@ -116,11 +128,23 @@ test('it can swap tokens for an asset', async (t) => {
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
 
-  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, publicKey(escrow));
+  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
   t.deepEqual(escrowTokenAfter.token.amount, 5n);
-  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, umi.identity.publicKey);
+  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    umi.identity.publicKey
+  );
   t.deepEqual(userTokenAfter.token.amount, 994n);
-  const feeTokenAfter = await fetchDigitalAssetWithAssociatedToken(umi, tokenMint.publicKey, escrowData.feeLocation);
+  const feeTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    escrowData.feeLocation
+  );
   t.deepEqual(feeTokenAfter.token.amount, 1n);
   const assetAfter = await fetchAsset(umi, assets[0].publicKey);
   t.is(assetAfter.owner, umi.identity.publicKey);

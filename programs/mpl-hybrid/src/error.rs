@@ -65,4 +65,8 @@ pub enum MplHybridError {
     /// 6015 (0x177F) - Invalid Token Account Mint
     #[msg("Invalid Token Account Mint")]
     InvalidTokenAccountMint,
+
+    /// 6016 (0x1780) - Invalid Token Account Mint
+    #[msg("Invalid Authorities")]
+    InvalidAuthority
 }

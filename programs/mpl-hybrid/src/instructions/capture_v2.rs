@@ -274,7 +274,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
 
     let transfer_fees_cpi_ctx = CpiContext::new(cpi_program.clone(), cpi_accounts_fee_transfer);
 
-    token::transfer(transfer_fees_cpi_ctx, recipe.fee_amount)?;
+    token::transfer(transfer_fees_cpi_ctx, recipe.fee_amount_capture)?;
 
     //create protocol transfer fee sol instruction
     let sol_fee_ix = anchor_lang::solana_program::system_instruction::transfer(
@@ -293,7 +293,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
     let sol_fee_project_ix = anchor_lang::solana_program::system_instruction::transfer(
         &owner.key(),
         &fee_project_account.key(),
-        recipe.sol_fee_amount,
+        recipe.sol_fee_amount_capture,
     );
 
     //invoke project the transfer fee sol instruction for project

@@ -268,11 +268,23 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
         &[owner.to_account_info(), fee_sol_account.to_account_info()],
     )?;
 
+
+    //create transfer fee token instruction
+    let cpi_accounts_fee_transfer = Transfer {
+        from: user_token_account.to_account_info(),
+        to: fee_token_account.to_account_info(),
+        authority: owner.to_account_info(),
+    };
+    
+    let transfer_fees_cpi_ctx = CpiContext::new(cpi_program.clone(), cpi_accounts_fee_transfer);
+    
+    token::transfer(transfer_fees_cpi_ctx, recipe.fee_amount_release)?;
+
     //create project transfer fee sol instruction for project
     let sol_fee_project_ix = anchor_lang::solana_program::system_instruction::transfer(
         &owner.key(),
         &fee_project_account.key(),
-        recipe.sol_fee_amount,
+        recipe.sol_fee_amount_release,
     );
 
     //invoke project the transfer fee sol instruction for project

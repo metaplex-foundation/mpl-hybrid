@@ -21,9 +21,13 @@ pub struct RecipeV1 {
     //8 the token cost to swap
     pub amount: u64,
     //8 the token fee for capturing the NFT
-    pub fee_amount: u64,
+    pub fee_amount_capture: u64,
     //8 the sol fee for capturing the NFT
-    pub sol_fee_amount: u64,
+    pub sol_fee_amount_capture: u64,
+    //8 the token fee for releasing the NFT
+    pub fee_amount_release: u64,
+    //8 the sol fee for releasing the NFT
+    pub sol_fee_amount_release: u64,
     //8 the total number of swaps
     pub count: u64,
     //1 onchain/offchain metadata update path

@@ -13,8 +13,10 @@ pub struct UpdateRecipeV1Ix {
     max: Option<u64>,
     min: Option<u64>,
     amount: Option<u64>,
-    fee_amount: Option<u64>,
-    sol_fee_amount: Option<u64>,
+    fee_amount_capture: Option<u64>,
+    fee_amount_release: Option<u64>,
+    sol_fee_amount_capture: Option<u64>,
+    sol_fee_amount_release: Option<u64>,
     path: Option<u16>,
 }
 
@@ -97,12 +99,18 @@ pub fn handler_update_recipe_v1(
     if let Some(amount) = ix.amount {
         recipe.amount = amount;
     }
-    if let Some(fee_amount) = ix.fee_amount {
-        recipe.fee_amount = fee_amount;
+    if let Some(fee_amount_capture) = ix.fee_amount_capture {
+        recipe.fee_amount_capture = fee_amount_capture;
     }
-    if let Some(sol_fee_amount) = ix.sol_fee_amount {
-        recipe.sol_fee_amount = sol_fee_amount;
+    if let Some(sol_fee_amount_capture) = ix.sol_fee_amount_capture {
+        recipe.sol_fee_amount_capture = sol_fee_amount_capture;
     }
+    if let Some(fee_amount_release) = ix.fee_amount_release {
+        recipe.fee_amount_release = fee_amount_release;
+    }
+    if let Some(sol_fee_amount_release) = ix.sol_fee_amount_release {
+        recipe.sol_fee_amount_release = sol_fee_amount_release;
+    }    
     if let Some(path) = ix.path {
         recipe.path = path;
     }

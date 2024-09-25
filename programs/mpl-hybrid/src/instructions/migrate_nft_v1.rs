@@ -1,24 +1,14 @@
 use crate::error::MplHybridError;
 use crate::state::*;
-use crate::utils::validate_token_account;
-use crate::{constants::*, utils::create_associated_token_account};
+use crate::{constants::*};
 use anchor_lang::{
     accounts::{program::Program, signer::Signer, unchecked_account::UncheckedAccount},
     system_program::System,
 };
-use anchor_lang::{prelude::*, system_program};
-use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token;
-use anchor_spl::token::Mint;
-use anchor_spl::token::{Token, Transfer};
-use arrayref::array_ref;
-use mpl_core::accounts::BaseAssetV1;
+use anchor_lang::{prelude::*};
 use mpl_core::instructions::{
-    TransferV1Cpi, TransferV1InstructionArgs, UpdateV1Cpi, UpdateV1InstructionArgs,
+    TransferV1Cpi, TransferV1InstructionArgs
 };
-use mpl_core::types::UpdateAuthority;
-use mpl_utils::assert_signer;
-use solana_program::program::invoke;
 
 #[derive(Accounts)]
 pub struct MigrateNftV1Ctx<'info> {
@@ -75,11 +65,7 @@ pub fn handler_migrate_nft_v1(ctx: Context<MigrateNftV1Ctx>) -> Result<()> {
     let system_info = &system_program.to_account_info();
 
     let collection_info = &collection.to_account_info();
-    let authority_info = &authority.to_account_info();
     let escrow_info = &escrow_old.to_account_info(); 
-
-    // We only fetch the Base assets because we only need to check the collection here.
-    let asset_data = BaseAssetV1::from_bytes(&asset.to_account_info().data.borrow())?;
 
     //create transfer instruction
     let transfer_nft_ix = TransferV1Cpi {

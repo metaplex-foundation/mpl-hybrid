@@ -37,7 +37,7 @@ pub struct CaptureV2Ctx<'info> {
             ],
         bump=recipe.bump
     )]
-    recipe: Account<'info, RecipeV1>,
+    recipe: Box<Account<'info, RecipeV1>>,
 
     #[account(
         mut,
@@ -47,7 +47,7 @@ pub struct CaptureV2Ctx<'info> {
             ],
         bump=escrow.bump,
     )]
-    escrow: Account<'info, EscrowV2>,
+    escrow: Box<Account<'info, EscrowV2>>,
 
     /// CHECK: We check the asset bellow
     #[account(mut)]

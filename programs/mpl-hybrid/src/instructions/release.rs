@@ -37,7 +37,7 @@ pub struct ReleaseV1Ctx<'info> {
             ],
         bump=escrow.bump
     )]
-    escrow: Account<'info, EscrowV1>,
+    escrow: Box<Account<'info, EscrowV1>>,
 
     /// CHECK: We check the asset bellow
     #[account(mut)]

@@ -38,5 +38,5 @@ pub struct RecipeV1 {
 
 impl RecipeV1 {
     pub const BASE_RECIPE_SIZE: usize =
-        8 + 32 + 32 + 32 + 32 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 2 + 1;
+        8 + 32 + 32 + 32 + 32 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 2 + 1;
 }

@@ -61,6 +61,16 @@ pub fn handler_migrate_nft_v1(ctx: Context<MigrateNftV1Ctx>) -> Result<()> {
     let asset = &mut ctx.accounts.asset;
     let mpl_core = &mut ctx.accounts.mpl_core;
     let system_program = &mut ctx.accounts.system_program;
+
+    
+    if escrow_new.authority != escrow_old.authority {
+        return Err(MplHybridError::InvalidAuthority.into());
+    }
+
+    if escrow_new.authority != authority.key() {
+        return Err(MplHybridError::InvalidAuthority.into());
+    }
+    
     
     let system_info = &system_program.to_account_info();
 

@@ -179,7 +179,7 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
     }
 
     if authority_info.key == &recipe.authority {
-        assert_signer(&ctx.accounts.authority)?;
+        assert_signer(authority)?;
     }
 
     //If the path has bit 0 set, we need to update the metadata onchain
@@ -213,7 +213,7 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
             update_ix.invoke()?;
         } else if authority_info.key == &escrow.key() {
             // The auth has been delegated as the UpdateDelegate on the asset.
-            update_ix.invoke_signed(&[&[b"escrow", collection.key.as_ref(), &[escrow.bump]]])?;
+            update_ix.invoke_signed(&[&[b"escrow", authority.key.as_ref(), &[escrow.bump]]])?;
         } else {
             return Err(MplHybridError::InvalidUpdateAuthority.into());
         }
@@ -240,7 +240,7 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
     //create transfer token instruction
     let cpi_program = token_program.to_account_info();
 
-    let signer_seeds = &[b"escrow", collection.key.as_ref(), &[escrow.bump]];
+    let signer_seeds = &[b"escrow", authority.key.as_ref(), &[escrow.bump]];
 
     let signer = &[&signer_seeds[..]];
 

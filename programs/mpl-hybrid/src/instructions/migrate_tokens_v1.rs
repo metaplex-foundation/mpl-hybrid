@@ -81,6 +81,14 @@ pub fn handler_migrate_tokens_v1(ctx: Context<MigrateTokensV1Ctx>, ix: MigrateTo
     let system_program = &mut ctx.accounts.system_program;
     let token_program = &mut ctx.accounts.token_program;
 
+    if escrow_new.authority != escrow_old.authority {
+        return Err(MplHybridError::InvalidAuthority.into());
+    }
+
+    if escrow_new.authority != authority.key() {
+        return Err(MplHybridError::InvalidAuthority.into());
+    }
+
     // Create idempotent
     if escrow_new_token_account.owner == &system_program::ID {
         solana_program::msg!("Creating user token account");

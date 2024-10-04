@@ -1,15 +1,16 @@
 use crate::constants::*;
 use crate::error::MplHybridError;
 use crate::state::*;
+use crate::utils::{create_associated_token_account, validate_token_account};
 use anchor_lang::prelude::*;
 use anchor_lang::{
-    accounts::{program::Program, signer::Signer, unchecked_account::UncheckedAccount},
+    accounts::{program::Program, signer::Signer},
     system_program::System,
 };
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token;
 use anchor_spl::token::Mint;
-use anchor_spl::token::{Token, TokenAccount, Transfer};
+use anchor_spl::token::{Token, Transfer};
 use mpl_core::accounts::BaseAssetV1;
 use mpl_core::instructions::{
     TransferV1Cpi, TransferV1InstructionArgs, UpdateV1Cpi, UpdateV1InstructionArgs,
@@ -17,6 +18,7 @@ use mpl_core::instructions::{
 use mpl_core::types::UpdateAuthority;
 use mpl_utils::assert_signer;
 use solana_program::program::invoke;
+use solana_program::system_program;
 
 #[derive(Accounts)]
 pub struct ReleaseV1Ctx<'info> {
@@ -35,11 +37,11 @@ pub struct ReleaseV1Ctx<'info> {
             ],
         bump=escrow.bump
     )]
-    escrow: Account<'info, EscrowV1>,
+    escrow: Box<Account<'info, EscrowV1>>,
 
     /// CHECK: We check the asset bellow
     #[account(mut)]
-    asset: UncheckedAccount<'info>,
+    asset: AccountInfo<'info>,
 
     /// CHECK: We check against escrow
     #[account(mut,
@@ -47,19 +49,13 @@ pub struct ReleaseV1Ctx<'info> {
     )]
     collection: AccountInfo<'info>,
 
-    #[account(init_if_needed,
-        payer = owner,
-        associated_token::mint = token,
-        associated_token::authority = owner
-    )]
-    user_token_account: Account<'info, TokenAccount>,
+    /// CHECK: We check and initialize the token account below.
+    #[account(mut)]
+    user_token_account: AccountInfo<'info>,
 
-    #[account(init_if_needed,
-        payer = owner,
-        associated_token::mint = token,
-        associated_token::authority = escrow
-    )]
-    escrow_token_account: Account<'info, TokenAccount>,
+    /// CHECK: We check the token account below.
+    #[account(mut)]
+    escrow_token_account: AccountInfo<'info>,
 
     /// CHECK: This is a user defined account
     #[account(
@@ -67,11 +63,9 @@ pub struct ReleaseV1Ctx<'info> {
     )]
     token: Account<'info, Mint>,
 
-    #[account(init_if_needed,
-        payer = owner,
-        associated_token::mint = token,
-        associated_token::authority = fee_project_account)]
-    fee_token_account: Account<'info, TokenAccount>,
+    /// CHECK: We check and initialize the token account below.
+    #[account(mut)]
+    fee_token_account: AccountInfo<'info>,
 
     /// CHECK: We check against constant
     #[account(mut,
@@ -112,7 +106,7 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
     let mpl_core = &mut ctx.accounts.mpl_core;
     let user_token_account = &mut ctx.accounts.user_token_account;
     let escrow_token_account = &mut ctx.accounts.escrow_token_account;
-    let _fee_token_account = &mut ctx.accounts.fee_token_account;
+    let fee_token_account = &mut ctx.accounts.fee_token_account;
     let fee_sol_account = &mut ctx.accounts.fee_sol_account;
     let fee_project_account = &mut ctx.accounts.fee_project_account;
     let system_program = &mut ctx.accounts.system_program;
@@ -122,6 +116,45 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
     let authority_info = &authority.to_account_info();
     let owner_info = &owner.to_account_info();
     let system_info = &system_program.to_account_info();
+
+    // Create idempotent
+    if user_token_account.owner == &system_program::ID {
+        solana_program::msg!("Creating user token account");
+        create_associated_token_account(
+            owner,
+            owner,
+            &ctx.accounts.token.to_account_info(),
+            user_token_account,
+            token_program,
+            system_program,
+        )?;
+    } else {
+        validate_token_account(user_token_account, &owner.key(), &ctx.accounts.token.key())?;
+    }
+
+    // The escrow token account should already exist.
+    validate_token_account(
+        escrow_token_account,
+        &escrow.key(),
+        &ctx.accounts.token.key(),
+    )?;
+
+    if fee_token_account.owner == &system_program::ID {
+        create_associated_token_account(
+            owner,
+            &fee_project_account.to_account_info(),
+            &ctx.accounts.token.to_account_info(),
+            fee_token_account,
+            token_program,
+            system_program,
+        )?;
+    } else {
+        validate_token_account(
+            fee_token_account,
+            &fee_project_account.key(),
+            &ctx.accounts.token.key(),
+        )?;
+    }
 
     // We only fetch the Base assets because we only need to check the collection here.
     let asset_data = BaseAssetV1::from_bytes(&asset.to_account_info().data.borrow())?;

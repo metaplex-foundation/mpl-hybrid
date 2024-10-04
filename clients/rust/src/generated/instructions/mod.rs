@@ -6,15 +6,29 @@
 //!
 
 pub(crate) mod r#capture_v1;
+pub(crate) mod r#capture_v2;
 pub(crate) mod r#init_escrow_v1;
+pub(crate) mod r#init_escrow_v2;
 pub(crate) mod r#init_nft_data_v1;
+pub(crate) mod r#init_recipe;
+pub(crate) mod r#migrate_nft_v1;
+pub(crate) mod r#migrate_tokens_v1;
 pub(crate) mod r#release_v1;
+pub(crate) mod r#release_v2;
 pub(crate) mod r#update_escrow_v1;
 pub(crate) mod r#update_new_data_v1;
+pub(crate) mod r#update_recipe_v1;
 
 pub use self::r#capture_v1::*;
+pub use self::r#capture_v2::*;
 pub use self::r#init_escrow_v1::*;
+pub use self::r#init_escrow_v2::*;
 pub use self::r#init_nft_data_v1::*;
+pub use self::r#init_recipe::*;
+pub use self::r#migrate_nft_v1::*;
+pub use self::r#migrate_tokens_v1::*;
 pub use self::r#release_v1::*;
+pub use self::r#release_v2::*;
 pub use self::r#update_escrow_v1::*;
 pub use self::r#update_new_data_v1::*;
+pub use self::r#update_recipe_v1::*;

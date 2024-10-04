@@ -7,4 +7,6 @@
  */
 
 export * from './escrowV1';
+export * from './escrowV2';
 export * from './nftDataV1';
+export * from './recipeV1';

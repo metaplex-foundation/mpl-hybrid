@@ -226,6 +226,19 @@ export class InvalidTokenAccountMintError extends ProgramError {
 codeToErrorMap.set(0x177f, InvalidTokenAccountMintError);
 nameToErrorMap.set('InvalidTokenAccountMint', InvalidTokenAccountMintError);
 
+/** InvalidAuthority: Invalid Authorities */
+export class InvalidAuthorityError extends ProgramError {
+  override readonly name: string = 'InvalidAuthority';
+
+  readonly code: number = 0x1780; // 6016
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid Authorities', program, cause);
+  }
+}
+codeToErrorMap.set(0x1780, InvalidAuthorityError);
+nameToErrorMap.set('InvalidAuthority', InvalidAuthorityError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

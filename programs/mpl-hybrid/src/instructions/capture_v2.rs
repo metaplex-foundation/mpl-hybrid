@@ -127,7 +127,6 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
     let escrow_info = &escrow.to_account_info();
     let system_info = &system_program.to_account_info();
 
-
     if recipe.authority != escrow.authority {
         return Err(MplHybridError::InvalidAuthority.into());
     }
@@ -190,7 +189,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
 
         let seed = u64::from_le_bytes(*most_recent)
             .saturating_sub(clock.unix_timestamp as u64)
-            .wrapping_mul(recipe.count as u64);
+            .wrapping_mul(recipe.count);
 
         // remainder is the random number between the min and max
         let remainder = seed

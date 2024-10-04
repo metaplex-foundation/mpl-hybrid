@@ -174,7 +174,7 @@ pub fn handler_capture_v1(ctx: Context<CaptureV1Ctx>) -> Result<()> {
 
         let seed = u64::from_le_bytes(*most_recent)
             .saturating_sub(clock.unix_timestamp as u64)
-            .wrapping_mul(escrow.count as u64);
+            .wrapping_mul(escrow.count);
 
         // remainder is the random number between the min and max
         let remainder = seed

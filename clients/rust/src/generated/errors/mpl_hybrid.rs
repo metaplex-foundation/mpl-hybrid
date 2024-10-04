@@ -58,6 +58,9 @@ pub enum MplHybridError {
     /// 6015 (0x177F) - Invalid Token Account Mint
     #[error("Invalid Token Account Mint")]
     InvalidTokenAccountMint,
+    /// 6016 (0x1780) - Invalid Authorities
+    #[error("Invalid Authorities")]
+    InvalidAuthority,
 }
 
 impl solana_program::program_error::PrintProgramError for MplHybridError {

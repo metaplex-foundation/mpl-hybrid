@@ -7,8 +7,15 @@
  */
 
 export * from './captureV1';
+export * from './captureV2';
 export * from './initEscrowV1';
+export * from './initEscrowV2';
 export * from './initNftDataV1';
+export * from './initRecipe';
+export * from './migrateNftV1';
+export * from './migrateTokensV1';
 export * from './releaseV1';
+export * from './releaseV2';
 export * from './updateEscrowV1';
 export * from './updateNewDataV1';
+export * from './updateRecipeV1';

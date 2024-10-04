@@ -3,6 +3,67 @@
   "name": "mpl_hybrid",
   "instructions": [
     {
+      "name": "initRecipe",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "token",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feeLocation",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feeAta",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The ATA for token fees to be stored"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "ix",
+          "type": {
+            "defined": "InitRecipeV1Ix"
+          }
+        }
+      ]
+    },
+    {
       "name": "initEscrowV1",
       "accounts": [
         {
@@ -64,6 +125,27 @@
       ]
     },
     {
+      "name": "initEscrowV2",
+      "accounts": [
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "initNftDataV1",
       "accounts": [
         {
@@ -121,6 +203,97 @@
         },
         {
           "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "asset",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "token",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feeTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeSolAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeProjectAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "recentBlockhashes",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mplCore",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "captureV2",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "recipe",
           "isMut": true,
           "isSigner": false
         },
@@ -208,6 +381,97 @@
         {
           "name": "authority",
           "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "asset",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "userTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "token",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feeTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeSolAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "feeProjectAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "recentBlockhashes",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mplCore",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "releaseV2",
+      "accounts": [
+        {
+          "name": "owner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "recipe",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -282,6 +546,49 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "updateRecipeV1",
+      "accounts": [
+        {
+          "name": "recipe",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "token",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feeLocation",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "ix",
+          "type": {
+            "defined": "UpdateRecipeV1Ix"
+          }
+        }
+      ]
     },
     {
       "name": "updateEscrowV1",
@@ -373,9 +680,129 @@
           }
         }
       ]
+    },
+    {
+      "name": "migrateNftV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "escrowNew",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOld",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "asset",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mplCore",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "migrateTokensV1",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "escrowNew",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOld",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowNewTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowOldTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "token",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "ix",
+          "type": {
+            "defined": "MigrateTokensV1Ix"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
+    {
+      "name": "EscrowV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
     {
       "name": "EscrowV1",
       "type": {
@@ -499,6 +926,78 @@
           }
         ]
       }
+    },
+    {
+      "name": "RecipeV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "collection",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "token",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeLocation",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "max",
+            "type": "u64"
+          },
+          {
+            "name": "min",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "feeAmountCapture",
+            "type": "u64"
+          },
+          {
+            "name": "solFeeAmountCapture",
+            "type": "u64"
+          },
+          {
+            "name": "feeAmountRelease",
+            "type": "u64"
+          },
+          {
+            "name": "solFeeAmountRelease",
+            "type": "u64"
+          },
+          {
+            "name": "count",
+            "type": "u64"
+          },
+          {
+            "name": "path",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
     }
   ],
   "types": [
@@ -578,6 +1077,66 @@
           {
             "name": "path",
             "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitRecipeV1Ix",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "max",
+            "type": "u64"
+          },
+          {
+            "name": "min",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "feeAmountCapture",
+            "type": "u64"
+          },
+          {
+            "name": "feeAmountRelease",
+            "type": "u64"
+          },
+          {
+            "name": "solFeeAmountCapture",
+            "type": "u64"
+          },
+          {
+            "name": "solFeeAmountRelease",
+            "type": "u64"
+          },
+          {
+            "name": "path",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MigrateTokensV1Ix",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
           }
         ]
       }
@@ -695,6 +1254,74 @@
       }
     },
     {
+      "name": "UpdateRecipeV1Ix",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "uri",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "max",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "min",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "amount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "feeAmountCapture",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "feeAmountRelease",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "solFeeAmountCapture",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "solFeeAmountRelease",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "path",
+            "type": {
+              "option": "u16"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "Path",
       "type": {
         "kind": "enum",
@@ -786,6 +1413,11 @@
       "code": 6015,
       "name": "InvalidTokenAccountMint",
       "msg": "Invalid Token Account Mint"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidAuthority",
+      "msg": "Invalid Authorities"
     }
   ],
   "metadata": {

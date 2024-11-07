@@ -271,7 +271,7 @@ pub fn handler_capture_v1(ctx: Context<CaptureV1Ctx>) -> Result<()> {
     let _sol_fee_result = invoke(
         &sol_fee_ix,
         &[owner.to_account_info(), fee_sol_account.to_account_info()],
-    );
+    )?;
 
     //create project transfer fee sol instruction for project
     let sol_fee_project_ix = anchor_lang::solana_program::system_instruction::transfer(
@@ -287,7 +287,7 @@ pub fn handler_capture_v1(ctx: Context<CaptureV1Ctx>) -> Result<()> {
             owner.to_account_info(),
             fee_project_account.to_account_info(),
         ],
-    );
+    )?;
 
     //increment the swap count
     escrow.count += 1;

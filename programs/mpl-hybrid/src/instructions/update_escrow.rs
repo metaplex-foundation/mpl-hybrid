@@ -70,6 +70,11 @@ pub fn handler_update_escrow_v1(
         return Err(MplHybridError::InvalidCollectionAuthority.into());
     }
 
+    // We can't allow the max to be less than the min.
+    if ix.max <= ix.min {
+        return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+    }
+
     let mut size_diff: isize = 0;
     escrow.authority = authority.key();
     escrow.token = token.key();

@@ -82,7 +82,7 @@ pub fn handler_init_escrow_v1(ctx: Context<InitEscrowV1Ctx>, ix: InitEscrowV1Ix)
     let fee_location = &mut ctx.accounts.fee_location;
 
     // We can't allow the max to be less than the min.
-    if ix.max < ix.min {
+    if ix.max <= ix.min {
         return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
     }
 

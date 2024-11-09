@@ -49,6 +49,18 @@ pub enum MplHybridError {
     /// 6012 (0x177C) - Invalid Update Authority
     #[error("Invalid Update Authority")]
     InvalidUpdateAuthority,
+    /// 6013 (0x177D) - Invalid Token Account
+    #[error("Invalid Token Account")]
+    InvalidTokenAccount,
+    /// 6014 (0x177E) - Invalid Token Account Owner
+    #[error("Invalid Token Account Owner")]
+    InvalidTokenAccountOwner,
+    /// 6015 (0x177F) - Invalid Token Account Mint
+    #[error("Invalid Token Account Mint")]
+    InvalidTokenAccountMint,
+    /// 6016 (0x1780) - Invalid Authorities
+    #[error("Invalid Authorities")]
+    InvalidAuthority,
 }
 
 impl solana_program::program_error::PrintProgramError for MplHybridError {

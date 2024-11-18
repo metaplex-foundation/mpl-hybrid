@@ -10,22 +10,18 @@ import {
   string,
   publicKey as publicKeySerializer,
 } from '@metaplex-foundation/umi/serializers';
+import { addCollectionPlugin, fetchAsset } from '@metaplex-foundation/mpl-core';
 import {
-  addCollectionPlugin,
-  fetchAsset,
-  transfer,
-} from '@metaplex-foundation/mpl-core';
-import {
-  captureV1,
   EscrowV1,
   fetchEscrowV1,
   initEscrowV1,
   MPL_HYBRID_PROGRAM_ID,
   Path,
-} from '../src';
-import { createCoreCollection, createUmi } from './_setup';
+  releaseV1,
+} from '../../src';
+import { createCoreCollection, createUmi } from '../_setup';
 
-test('it can swap tokens for an asset', async (t) => {
+test('it can swap an asset for tokens', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
   const feeLocation = generateSigner(umi);
@@ -42,28 +38,17 @@ test('it can swap tokens for an asset', async (t) => {
     mint: tokenMint,
   }).sendAndConfirm(umi);
 
-  await mintV1(umi, {
-    mint: tokenMint.publicKey,
-    tokenStandard: TokenStandard.Fungible,
-    tokenOwner: umi.identity.publicKey,
-    amount: 1000,
-  }).sendAndConfirm(umi);
-
   const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
     string({ size: 'variable' }).serialize('escrow'),
     publicKeySerializer().serialize(collection.publicKey),
   ]);
 
-  // Transfer the assets to the escrow.
-  // eslint-disable-next-line no-restricted-syntax
-  for (const asset of assets) {
-    // eslint-disable-next-line no-await-in-loop
-    await transfer(umi, {
-      asset,
-      collection,
-      newOwner: escrow,
-    }).sendAndConfirm(umi);
-  }
+  await mintV1(umi, {
+    mint: tokenMint.publicKey,
+    tokenStandard: TokenStandard.Fungible,
+    tokenOwner: escrow,
+    amount: 1000,
+  }).sendAndConfirm(umi);
 
   await initEscrowV1(umi, {
     escrow,
@@ -99,27 +84,26 @@ test('it can swap tokens for an asset', async (t) => {
     solFeeAmount: 1_000_000n,
   });
 
-  const userTokenBefore = await fetchDigitalAssetWithAssociatedToken(
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
     umi,
     tokenMint.publicKey,
-    umi.identity.publicKey
+    publicKey(escrow)
   );
-  t.deepEqual(userTokenBefore.token.amount, 1000n);
+  t.deepEqual(escrowTokenBefore.token.amount, 1000n);
   try {
     await fetchDigitalAssetWithAssociatedToken(
       umi,
       tokenMint.publicKey,
-      publicKey(escrow)
+      umi.identity.publicKey
     );
-    t.fail('Escrow token account should not exist');
+    t.fail('User token account should not exist');
   } catch (e) {
     t.is(e.name, 'AccountNotFoundError');
   }
 
-  const assetBefore = await fetchAsset(umi, assets[0].publicKey);
-  t.is(assetBefore.owner, publicKey(escrow));
+  t.is(assets[0].owner, umi.identity.publicKey);
 
-  await captureV1(umi, {
+  await releaseV1(umi, {
     owner: umi.identity,
     escrow,
     asset: assets[0].publicKey,
@@ -133,24 +117,18 @@ test('it can swap tokens for an asset', async (t) => {
     tokenMint.publicKey,
     publicKey(escrow)
   );
-  t.deepEqual(escrowTokenAfter.token.amount, 5n);
+  t.deepEqual(escrowTokenAfter.token.amount, 995n);
   const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(
     umi,
     tokenMint.publicKey,
     umi.identity.publicKey
   );
-  t.deepEqual(userTokenAfter.token.amount, 994n);
-  const feeTokenAfter = await fetchDigitalAssetWithAssociatedToken(
-    umi,
-    tokenMint.publicKey,
-    escrowData.feeLocation
-  );
-  t.deepEqual(feeTokenAfter.token.amount, 1n);
+  t.deepEqual(userTokenAfter.token.amount, 5n);
   const assetAfter = await fetchAsset(umi, assets[0].publicKey);
-  t.is(assetAfter.owner, umi.identity.publicKey);
+  t.is(assetAfter.owner, publicKey(escrow));
 });
 
-test('it can swap tokens for an asset as UpdateDelegate', async (t) => {
+test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
   const feeLocation = generateSigner(umi);
@@ -167,28 +145,17 @@ test('it can swap tokens for an asset as UpdateDelegate', async (t) => {
     mint: tokenMint,
   }).sendAndConfirm(umi);
 
-  await mintV1(umi, {
-    mint: tokenMint.publicKey,
-    tokenStandard: TokenStandard.Fungible,
-    tokenOwner: umi.identity.publicKey,
-    amount: 1000,
-  }).sendAndConfirm(umi);
-
   const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
     string({ size: 'variable' }).serialize('escrow'),
     publicKeySerializer().serialize(collection.publicKey),
   ]);
 
-  // Transfer the assets to the escrow.
-  // eslint-disable-next-line no-restricted-syntax
-  for (const asset of assets) {
-    // eslint-disable-next-line no-await-in-loop
-    await transfer(umi, {
-      asset,
-      collection,
-      newOwner: escrow,
-    }).sendAndConfirm(umi);
-  }
+  await mintV1(umi, {
+    mint: tokenMint.publicKey,
+    tokenStandard: TokenStandard.Fungible,
+    tokenOwner: escrow,
+    amount: 1000,
+  }).sendAndConfirm(umi);
 
   await initEscrowV1(umi, {
     escrow,
@@ -235,7 +202,26 @@ test('it can swap tokens for an asset as UpdateDelegate', async (t) => {
     solFeeAmount: 1_000_000n,
   });
 
-  await captureV1(umi, {
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
+  t.deepEqual(escrowTokenBefore.token.amount, 1000n);
+  try {
+    await fetchDigitalAssetWithAssociatedToken(
+      umi,
+      tokenMint.publicKey,
+      umi.identity.publicKey
+    );
+    t.fail('User token account should not exist');
+  } catch (e) {
+    t.is(e.name, 'AccountNotFoundError');
+  }
+
+  t.is(assets[0].owner, umi.identity.publicKey);
+
+  await releaseV1(umi, {
     owner: umi.identity,
     authority: escrow,
     escrow,
@@ -244,4 +230,19 @@ test('it can swap tokens for an asset as UpdateDelegate', async (t) => {
     feeProjectAccount: escrowData.feeLocation,
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
+
+  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
+  t.deepEqual(escrowTokenAfter.token.amount, 995n);
+  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    umi.identity.publicKey
+  );
+  t.deepEqual(userTokenAfter.token.amount, 5n);
+  const assetAfter = await fetchAsset(umi, assets[0].publicKey);
+  t.is(assetAfter.owner, publicKey(escrow));
 });

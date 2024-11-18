@@ -3,7 +3,7 @@
   "name": "mpl_hybrid",
   "instructions": [
     {
-      "name": "initRecipe",
+      "name": "initRecipeV1",
       "accounts": [
         {
           "name": "recipe",

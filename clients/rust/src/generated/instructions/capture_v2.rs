@@ -14,7 +14,7 @@ use borsh::{BorshDeserialize, BorshSerialize};
 pub struct CaptureV2 {
     pub owner: solana_program::pubkey::Pubkey,
 
-    pub authority: solana_program::pubkey::Pubkey,
+    pub authority: (solana_program::pubkey::Pubkey, bool),
 
     pub recipe: solana_program::pubkey::Pubkey,
 
@@ -61,8 +61,8 @@ impl CaptureV2 {
             self.owner, true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            self.authority,
-            true,
+            self.authority.0,
+            self.authority.1,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             self.recipe,
@@ -161,17 +161,17 @@ impl CaptureV2InstructionData {
 ///   7. `[writable]` escrow_token_account
 ///   8. `[]` token
 ///   9. `[writable]` fee_token_account
-///   10. `[writable]` fee_sol_account
+///   10. `[writable, optional]` fee_sol_account (default to `GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3`)
 ///   11. `[writable]` fee_project_account
-///   12. `[]` recent_blockhashes
-///   13. `[]` mpl_core
+///   12. `[optional]` recent_blockhashes (default to `SysvarS1otHashes111111111111111111111111111`)
+///   13. `[optional]` mpl_core (default to `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d`)
 ///   14. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   15. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
-///   16. `[]` associated_token_program
+///   16. `[optional]` associated_token_program (default to `ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL`)
 #[derive(Default)]
 pub struct CaptureV2Builder {
     owner: Option<solana_program::pubkey::Pubkey>,
-    authority: Option<solana_program::pubkey::Pubkey>,
+    authority: Option<(solana_program::pubkey::Pubkey, bool)>,
     recipe: Option<solana_program::pubkey::Pubkey>,
     escrow: Option<solana_program::pubkey::Pubkey>,
     asset: Option<solana_program::pubkey::Pubkey>,
@@ -200,8 +200,12 @@ impl CaptureV2Builder {
         self
     }
     #[inline(always)]
-    pub fn authority(&mut self, authority: solana_program::pubkey::Pubkey) -> &mut Self {
-        self.authority = Some(authority);
+    pub fn authority(
+        &mut self,
+        authority: solana_program::pubkey::Pubkey,
+        as_signer: bool,
+    ) -> &mut Self {
+        self.authority = Some((authority, as_signer));
         self
     }
     #[inline(always)]
@@ -253,6 +257,7 @@ impl CaptureV2Builder {
         self.fee_token_account = Some(fee_token_account);
         self
     }
+    /// `[optional account, default to 'GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3']`
     #[inline(always)]
     pub fn fee_sol_account(
         &mut self,
@@ -269,6 +274,7 @@ impl CaptureV2Builder {
         self.fee_project_account = Some(fee_project_account);
         self
     }
+    /// `[optional account, default to 'SysvarS1otHashes111111111111111111111111111']`
     #[inline(always)]
     pub fn recent_blockhashes(
         &mut self,
@@ -277,6 +283,7 @@ impl CaptureV2Builder {
         self.recent_blockhashes = Some(recent_blockhashes);
         self
     }
+    /// `[optional account, default to 'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d']`
     #[inline(always)]
     pub fn mpl_core(&mut self, mpl_core: solana_program::pubkey::Pubkey) -> &mut Self {
         self.mpl_core = Some(mpl_core);
@@ -294,6 +301,7 @@ impl CaptureV2Builder {
         self.token_program = Some(token_program);
         self
     }
+    /// `[optional account, default to 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL']`
     #[inline(always)]
     pub fn associated_token_program(
         &mut self,
@@ -339,23 +347,27 @@ impl CaptureV2Builder {
             fee_token_account: self
                 .fee_token_account
                 .expect("fee_token_account is not set"),
-            fee_sol_account: self.fee_sol_account.expect("fee_sol_account is not set"),
+            fee_sol_account: self.fee_sol_account.unwrap_or(solana_program::pubkey!(
+                "GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3"
+            )),
             fee_project_account: self
                 .fee_project_account
                 .expect("fee_project_account is not set"),
-            recent_blockhashes: self
-                .recent_blockhashes
-                .expect("recent_blockhashes is not set"),
-            mpl_core: self.mpl_core.expect("mpl_core is not set"),
+            recent_blockhashes: self.recent_blockhashes.unwrap_or(solana_program::pubkey!(
+                "SysvarS1otHashes111111111111111111111111111"
+            )),
+            mpl_core: self.mpl_core.unwrap_or(solana_program::pubkey!(
+                "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+            )),
             system_program: self
                 .system_program
                 .unwrap_or(solana_program::pubkey!("11111111111111111111111111111111")),
             token_program: self.token_program.unwrap_or(solana_program::pubkey!(
                 "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
             )),
-            associated_token_program: self
-                .associated_token_program
-                .expect("associated_token_program is not set"),
+            associated_token_program: self.associated_token_program.unwrap_or(
+                solana_program::pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
+            ),
         };
 
         accounts.instruction_with_remaining_accounts(&self.__remaining_accounts)
@@ -366,7 +378,7 @@ impl CaptureV2Builder {
 pub struct CaptureV2CpiAccounts<'a, 'b> {
     pub owner: &'b solana_program::account_info::AccountInfo<'a>,
 
-    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
+    pub authority: (&'b solana_program::account_info::AccountInfo<'a>, bool),
 
     pub recipe: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -406,7 +418,7 @@ pub struct CaptureV2Cpi<'a, 'b> {
 
     pub owner: &'b solana_program::account_info::AccountInfo<'a>,
 
-    pub authority: &'b solana_program::account_info::AccountInfo<'a>,
+    pub authority: (&'b solana_program::account_info::AccountInfo<'a>, bool),
 
     pub recipe: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -504,8 +516,8 @@ impl<'a, 'b> CaptureV2Cpi<'a, 'b> {
             true,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
-            *self.authority.key,
-            true,
+            *self.authority.0.key,
+            self.authority.1,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
             *self.recipe.key,
@@ -584,7 +596,7 @@ impl<'a, 'b> CaptureV2Cpi<'a, 'b> {
         let mut account_infos = Vec::with_capacity(17 + 1 + remaining_accounts.len());
         account_infos.push(self.__program.clone());
         account_infos.push(self.owner.clone());
-        account_infos.push(self.authority.clone());
+        account_infos.push(self.authority.0.clone());
         account_infos.push(self.recipe.clone());
         account_infos.push(self.escrow.clone());
         account_infos.push(self.asset.clone());
@@ -671,8 +683,9 @@ impl<'a, 'b> CaptureV2CpiBuilder<'a, 'b> {
     pub fn authority(
         &mut self,
         authority: &'b solana_program::account_info::AccountInfo<'a>,
+        as_signer: bool,
     ) -> &mut Self {
-        self.instruction.authority = Some(authority);
+        self.instruction.authority = Some((authority, as_signer));
         self
     }
     #[inline(always)]
@@ -904,7 +917,7 @@ impl<'a, 'b> CaptureV2CpiBuilder<'a, 'b> {
 struct CaptureV2CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     owner: Option<&'b solana_program::account_info::AccountInfo<'a>>,
-    authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,
+    authority: Option<(&'b solana_program::account_info::AccountInfo<'a>, bool)>,
     recipe: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     escrow: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     asset: Option<&'b solana_program::account_info::AccountInfo<'a>>,

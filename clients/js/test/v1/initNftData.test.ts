@@ -5,24 +5,20 @@ import {
   publicKey as publicKeySerializer,
 } from '@metaplex-foundation/umi/serializers';
 import { createFungible } from '@metaplex-foundation/mpl-token-metadata';
+import { createCoreCollection, createUmi } from '../_setup';
 import {
-  findAssociatedTokenPda,
-  SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
-} from '@metaplex-foundation/mpl-toolbox';
-import { createCoreCollection, createUmi } from './_setup';
-import {
-  EscrowV1,
-  fetchEscrowV1,
-  initEscrowV1,
+  fetchNftDataV1,
+  initNftDataV1,
   MPL_HYBRID_PROGRAM_ID,
+  NftDataV1,
   Path,
-} from '../src';
+} from '../../src';
 
-test('it can initialize the escrow', async (t) => {
+test('it can initialize the nft data', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
   const feeLocation = generateSigner(umi);
-  const { collection } = await createCoreCollection(umi);
+  const { assets, collection } = await createCoreCollection(umi);
   const tokenMint = generateSigner(umi);
   await createFungible(umi, {
     name: 'Test Token',
@@ -35,14 +31,14 @@ test('it can initialize the escrow', async (t) => {
     mint: tokenMint,
   }).sendAndConfirm(umi);
 
-  const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
-    string({ size: 'variable' }).serialize('escrow'),
-    publicKeySerializer().serialize(collection.publicKey),
+  const nftData = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('nft'),
+    publicKeySerializer().serialize(assets[0].publicKey),
   ]);
 
-  await initEscrowV1(umi, {
-    escrow,
-    collection: collection.publicKey,
+  await initNftDataV1(umi, {
+    nftData,
+    asset: assets[0].publicKey,
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
@@ -52,17 +48,12 @@ test('it can initialize the escrow', async (t) => {
     amount: 3,
     feeAmount: 4,
     path: Path.RerollMetadata,
+    collection: collection.publicKey,
     solFeeAmount: 5,
-    feeAta: findAssociatedTokenPda(umi, {
-      mint: tokenMint.publicKey,
-      owner: publicKey(feeLocation.publicKey),
-    }),
-    associatedTokenProgram: SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
   }).sendAndConfirm(umi);
 
-  t.like(await fetchEscrowV1(umi, escrow), <EscrowV1>{
-    publicKey: publicKey(escrow),
-    collection: collection.publicKey,
+  t.like(await fetchNftDataV1(umi, nftData), <NftDataV1>{
+    publicKey: publicKey(nftData),
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
@@ -71,18 +62,19 @@ test('it can initialize the escrow', async (t) => {
     min: 1n,
     amount: 3n,
     feeAmount: 4n,
-    count: 1n,
+    count: 0n,
     path: Path.RerollMetadata,
-    bump: escrow[1],
+    bump: nftData[1],
     solFeeAmount: 5n,
   });
 });
 
-test('it cannot use an invalid collection', async (t) => {
+test('it cannot use an invalid asset', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
   const feeLocation = generateSigner(umi);
-  const collection = generateSigner(umi);
+  const { collection } = await createCoreCollection(umi);
+  const asset = generateSigner(umi);
   const tokenMint = generateSigner(umi);
   await createFungible(umi, {
     name: 'Test Token',
@@ -95,14 +87,14 @@ test('it cannot use an invalid collection', async (t) => {
     mint: tokenMint,
   }).sendAndConfirm(umi);
 
-  const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
-    string({ size: 'variable' }).serialize('escrow'),
-    publicKeySerializer().serialize(collection.publicKey),
+  const nftData = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('nft'),
+    publicKeySerializer().serialize(asset.publicKey),
   ]);
 
-  const result = initEscrowV1(umi, {
-    escrow,
-    collection: collection.publicKey,
+  const result = initNftDataV1(umi, {
+    nftData,
+    asset: asset.publicKey,
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
@@ -112,32 +104,28 @@ test('it cannot use an invalid collection', async (t) => {
     amount: 3,
     feeAmount: 4,
     path: Path.RerollMetadata,
+    collection: collection.publicKey,
     solFeeAmount: 5,
-    feeAta: findAssociatedTokenPda(umi, {
-      mint: tokenMint.publicKey,
-      owner: publicKey(feeLocation.publicKey),
-    }),
-    associatedTokenProgram: SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
   }).sendAndConfirm(umi);
 
-  await t.throwsAsync(result, { name: 'InvalidCollectionAccount' });
+  await t.throwsAsync(result, { name: 'InvalidAssetAccount' });
 });
 
 test('it cannot use an invalid token mint', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
   const feeLocation = generateSigner(umi);
-  const { collection } = await createCoreCollection(umi);
+  const { assets, collection } = await createCoreCollection(umi);
   const tokenMint = generateSigner(umi);
 
-  const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
-    string({ size: 'variable' }).serialize('escrow'),
-    publicKeySerializer().serialize(collection.publicKey),
+  const nftData = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('nft'),
+    publicKeySerializer().serialize(assets[0].publicKey),
   ]);
 
-  const result = initEscrowV1(umi, {
-    escrow,
-    collection: collection.publicKey,
+  const result = initNftDataV1(umi, {
+    nftData,
+    asset: assets[0].publicKey,
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
@@ -147,6 +135,7 @@ test('it cannot use an invalid token mint', async (t) => {
     amount: 3,
     feeAmount: 4,
     path: Path.RerollMetadata,
+    collection: collection.publicKey,
     solFeeAmount: 5,
   }).sendAndConfirm(umi);
 
@@ -160,7 +149,7 @@ test('it cannot set min higher than max', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
   const feeLocation = generateSigner(umi);
-  const { collection } = await createCoreCollection(umi);
+  const { assets, collection } = await createCoreCollection(umi);
   const tokenMint = generateSigner(umi);
   await createFungible(umi, {
     name: 'Test Token',
@@ -173,14 +162,14 @@ test('it cannot set min higher than max', async (t) => {
     mint: tokenMint,
   }).sendAndConfirm(umi);
 
-  const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
-    string({ size: 'variable' }).serialize('escrow'),
-    publicKeySerializer().serialize(collection.publicKey),
+  const nftData = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('nft'),
+    publicKeySerializer().serialize(assets[0].publicKey),
   ]);
 
-  const result = initEscrowV1(umi, {
-    escrow,
-    collection: collection.publicKey,
+  const result = initNftDataV1(umi, {
+    nftData,
+    asset: assets[0].publicKey,
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
@@ -190,6 +179,7 @@ test('it cannot set min higher than max', async (t) => {
     amount: 3,
     feeAmount: 4,
     path: Path.RerollMetadata,
+    collection: collection.publicKey,
     solFeeAmount: 5,
   }).sendAndConfirm(umi);
 

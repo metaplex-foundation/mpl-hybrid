@@ -6,12 +6,14 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   Context,
   Pda,
   PublicKey,
   Signer,
   TransactionBuilder,
+  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -24,28 +26,29 @@ import {
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
+  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
 // Accounts.
 export type CaptureV2InstructionAccounts = {
   owner: Signer;
-  authority?: Signer;
+  authority?: PublicKey | Pda | Signer;
   recipe: PublicKey | Pda;
   escrow: PublicKey | Pda;
   asset: PublicKey | Pda;
   collection: PublicKey | Pda;
-  userTokenAccount: PublicKey | Pda;
-  escrowTokenAccount: PublicKey | Pda;
+  userTokenAccount?: PublicKey | Pda;
+  escrowTokenAccount?: PublicKey | Pda;
   token: PublicKey | Pda;
-  feeTokenAccount: PublicKey | Pda;
-  feeSolAccount: PublicKey | Pda;
+  feeTokenAccount?: PublicKey | Pda;
+  feeSolAccount?: PublicKey | Pda;
   feeProjectAccount: PublicKey | Pda;
-  recentBlockhashes: PublicKey | Pda;
-  mplCore: PublicKey | Pda;
+  recentBlockhashes?: PublicKey | Pda;
+  mplCore?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
-  associatedTokenProgram: PublicKey | Pda;
+  associatedTokenProgram?: PublicKey | Pda;
 };
 
 // Data.
@@ -75,7 +78,7 @@ export function getCaptureV2InstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function captureV2(
-  context: Pick<Context, 'identity' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'programs'>,
   input: CaptureV2InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
@@ -177,6 +180,42 @@ export function captureV2(
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
   }
+  if (!resolvedAccounts.userTokenAccount.value) {
+    resolvedAccounts.userTokenAccount.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.token.value),
+      owner: expectPublicKey(resolvedAccounts.owner.value),
+    });
+  }
+  if (!resolvedAccounts.escrowTokenAccount.value) {
+    resolvedAccounts.escrowTokenAccount.value = findAssociatedTokenPda(
+      context,
+      {
+        mint: expectPublicKey(resolvedAccounts.token.value),
+        owner: expectPublicKey(resolvedAccounts.escrow.value),
+      }
+    );
+  }
+  if (!resolvedAccounts.feeTokenAccount.value) {
+    resolvedAccounts.feeTokenAccount.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.token.value),
+      owner: expectPublicKey(resolvedAccounts.feeProjectAccount.value),
+    });
+  }
+  if (!resolvedAccounts.feeSolAccount.value) {
+    resolvedAccounts.feeSolAccount.value = publicKey(
+      'GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3'
+    );
+  }
+  if (!resolvedAccounts.recentBlockhashes.value) {
+    resolvedAccounts.recentBlockhashes.value = publicKey(
+      'SysvarS1otHashes111111111111111111111111111'
+    );
+  }
+  if (!resolvedAccounts.mplCore.value) {
+    resolvedAccounts.mplCore.value = publicKey(
+      'CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d'
+    );
+  }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
       'splSystem',
@@ -190,6 +229,11 @@ export function captureV2(
       'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
     );
     resolvedAccounts.tokenProgram.isWritable = false;
+  }
+  if (!resolvedAccounts.associatedTokenProgram.value) {
+    resolvedAccounts.associatedTokenProgram.value = publicKey(
+      'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+    );
   }
 
   // Accounts in order.

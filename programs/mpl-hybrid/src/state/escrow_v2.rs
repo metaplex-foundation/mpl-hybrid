@@ -9,6 +9,5 @@ pub struct EscrowV2 {
 }
 
 impl EscrowV2 {
-    pub const BASE_ESCROW_V2_SIZE: usize =
-        8 + 32 + 1;
+    pub const BASE_ESCROW_V2_SIZE: usize = 8 + 32 + 1;
 }

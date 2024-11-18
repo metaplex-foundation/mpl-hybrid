@@ -12,15 +12,13 @@ use anchor_spl::token::Mint;
 use anchor_spl::token::{Token, Transfer};
 use solana_program::system_program;
 
-
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct MigrateTokensV1Ix {
-    amount: u64
+    amount: u64,
 }
 
 #[derive(Accounts)]
 pub struct MigrateTokensV1Ctx<'info> {
-
     #[account(mut)]
     authority: Signer<'info>,
 
@@ -69,7 +67,10 @@ pub struct MigrateTokensV1Ctx<'info> {
     associated_token_program: Program<'info, AssociatedToken>,
 }
 
-pub fn handler_migrate_tokens_v1(ctx: Context<MigrateTokensV1Ctx>, ix: MigrateTokensV1Ix) -> Result<()> {
+pub fn handler_migrate_tokens_v1(
+    ctx: Context<MigrateTokensV1Ctx>,
+    ix: MigrateTokensV1Ix,
+) -> Result<()> {
     //Need to add account checks for security
     let authority = &mut ctx.accounts.authority;
     let escrow_new = &mut ctx.accounts.escrow_new;
@@ -105,11 +106,7 @@ pub fn handler_migrate_tokens_v1(ctx: Context<MigrateTokensV1Ctx>, ix: MigrateTo
     }
 
     // The escrow token account should already exist.
-    validate_token_account(
-        escrow_old_token_account,
-        &escrow_old.key(),
-        &token.key(),
-    )?;
+    validate_token_account(escrow_old_token_account, &escrow_old.key(), &token.key())?;
 
     //create transfer token instruction
     let cpi_program = token_program.to_account_info();

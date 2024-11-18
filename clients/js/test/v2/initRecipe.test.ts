@@ -172,4 +172,3 @@ test('it cannot set min higher than max', async (t) => {
 
   await t.throwsAsync(result, { name: 'MaxMustBeGreaterThanMin' });
 });
-

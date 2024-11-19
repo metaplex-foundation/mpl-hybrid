@@ -79,18 +79,18 @@ pub fn handler_update_escrow_v1(
     escrow.authority = authority.key();
     escrow.token = token.key();
     escrow.fee_location = fee_location.key();
+
     if let Some(name) = ix.name {
-        size_diff += name
-            .len()
-            .checked_sub(escrow.name.len())
-            .ok_or(MplHybridError::NumericalOverflow)? as isize;
+        size_diff += (name.len() as isize)
+            .checked_sub(escrow.name.len() as isize)
+            .ok_or(MplHybridError::NumericalOverflow)?;
         escrow.name = name;
     }
+
     if let Some(uri) = ix.uri {
-        size_diff += uri
-            .len()
-            .checked_sub(escrow.uri.len())
-            .ok_or(MplHybridError::NumericalOverflow)? as isize;
+        size_diff += (uri.len() as isize)
+            .checked_sub(escrow.uri.len() as isize)
+            .ok_or(MplHybridError::NumericalOverflow)?;
         escrow.uri = uri;
     }
     if let Some(max) = ix.max {
@@ -112,16 +112,14 @@ pub fn handler_update_escrow_v1(
         escrow.path = path;
     }
 
-    let new_size = escrow
-        .to_account_info()
-        .data_len()
-        .checked_add(size_diff as usize)
+    let new_size = (escrow.to_account_info().data_len() as isize)
+        .checked_add(size_diff)
         .ok_or(MplHybridError::NumericalOverflow)?;
     resize_or_reallocate_account_raw(
         &escrow.to_account_info(),
         authority,
         &ctx.accounts.system_program,
-        new_size,
+        new_size as usize,
     )?;
 
     Ok(())

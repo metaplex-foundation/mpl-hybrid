@@ -5,14 +5,14 @@ import {
   publicKey as publicKeySerializer,
 } from '@metaplex-foundation/umi/serializers';
 import { createFungible } from '@metaplex-foundation/mpl-token-metadata';
-import { createCoreCollection, createUmi } from './_setup';
+import { createCoreCollection, createUmi } from '../_setup';
 import {
   fetchNftDataV1,
   initNftDataV1,
   MPL_HYBRID_PROGRAM_ID,
   NftDataV1,
   Path,
-} from '../src';
+} from '../../src';
 
 test('it can initialize the nft data', async (t) => {
   // Given a Umi instance using the project's plugin.
@@ -42,7 +42,7 @@ test('it can initialize the nft data', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 2,
     min: 1,
     amount: 3,
@@ -57,7 +57,7 @@ test('it can initialize the nft data', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 2n,
     min: 1n,
     amount: 3n,
@@ -98,7 +98,7 @@ test('it cannot use an invalid asset', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 2,
     min: 1,
     amount: 3,
@@ -129,7 +129,7 @@ test('it cannot use an invalid token mint', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 2,
     min: 1,
     amount: 3,
@@ -173,7 +173,7 @@ test('it cannot set min higher than max', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 1,
     min: 2,
     amount: 3,

@@ -1,14 +1,12 @@
+use crate::constants::*;
 use crate::error::MplHybridError;
 use crate::state::*;
-use crate::{constants::*};
+use anchor_lang::prelude::*;
 use anchor_lang::{
     accounts::{program::Program, signer::Signer, unchecked_account::UncheckedAccount},
     system_program::System,
 };
-use anchor_lang::{prelude::*};
-use mpl_core::instructions::{
-    TransferV1Cpi, TransferV1InstructionArgs
-};
+use mpl_core::instructions::{TransferV1Cpi, TransferV1InstructionArgs};
 
 #[derive(Accounts)]
 pub struct MigrateNftV1Ctx<'info> {
@@ -49,11 +47,10 @@ pub struct MigrateNftV1Ctx<'info> {
         address = MPL_CORE @ MplHybridError::InvalidMplCore
     )]
     mpl_core: AccountInfo<'info>,
-    system_program: Program<'info, System>
+    system_program: Program<'info, System>,
 }
 
 pub fn handler_migrate_nft_v1(ctx: Context<MigrateNftV1Ctx>) -> Result<()> {
-
     let authority = &mut ctx.accounts.authority;
     let escrow_new = &mut ctx.accounts.escrow_new;
     let escrow_old = &mut ctx.accounts.escrow_old;
@@ -62,7 +59,6 @@ pub fn handler_migrate_nft_v1(ctx: Context<MigrateNftV1Ctx>) -> Result<()> {
     let mpl_core = &mut ctx.accounts.mpl_core;
     let system_program = &mut ctx.accounts.system_program;
 
-    
     if escrow_new.authority != escrow_old.authority {
         return Err(MplHybridError::InvalidAuthority.into());
     }
@@ -70,12 +66,11 @@ pub fn handler_migrate_nft_v1(ctx: Context<MigrateNftV1Ctx>) -> Result<()> {
     if escrow_new.authority != authority.key() {
         return Err(MplHybridError::InvalidAuthority.into());
     }
-    
-    
+
     let system_info = &system_program.to_account_info();
 
     let collection_info = &collection.to_account_info();
-    let escrow_info = &escrow_old.to_account_info(); 
+    let escrow_info = &escrow_old.to_account_info();
 
     //create transfer instruction
     let transfer_nft_ix = TransferV1Cpi {

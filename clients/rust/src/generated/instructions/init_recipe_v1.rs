@@ -11,7 +11,7 @@ use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 use borsh::{BorshDeserialize, BorshSerialize};
 
 /// Accounts.
-pub struct InitRecipe {
+pub struct InitRecipeV1 {
     pub recipe: solana_program::pubkey::Pubkey,
 
     pub authority: solana_program::pubkey::Pubkey,
@@ -31,17 +31,17 @@ pub struct InitRecipe {
     pub associated_token_program: solana_program::pubkey::Pubkey,
 }
 
-impl InitRecipe {
+impl InitRecipeV1 {
     pub fn instruction(
         &self,
-        args: InitRecipeInstructionArgs,
+        args: InitRecipeV1InstructionArgs,
     ) -> solana_program::instruction::Instruction {
         self.instruction_with_remaining_accounts(args, &[])
     }
     #[allow(clippy::vec_init_then_push)]
     pub fn instruction_with_remaining_accounts(
         &self,
-        args: InitRecipeInstructionArgs,
+        args: InitRecipeV1InstructionArgs,
         remaining_accounts: &[solana_program::instruction::AccountMeta],
     ) -> solana_program::instruction::Instruction {
         let mut accounts = Vec::with_capacity(9 + remaining_accounts.len());
@@ -81,7 +81,7 @@ impl InitRecipe {
             false,
         ));
         accounts.extend_from_slice(remaining_accounts);
-        let mut data = InitRecipeInstructionData::new().try_to_vec().unwrap();
+        let mut data = InitRecipeV1InstructionData::new().try_to_vec().unwrap();
         let mut args = args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -95,14 +95,14 @@ impl InitRecipe {
 
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
-pub struct InitRecipeInstructionData {
+pub struct InitRecipeV1InstructionData {
     discriminator: [u8; 8],
 }
 
-impl InitRecipeInstructionData {
+impl InitRecipeV1InstructionData {
     pub fn new() -> Self {
         Self {
-            discriminator: [196, 35, 249, 242, 64, 106, 51, 53],
+            discriminator: [212, 22, 246, 254, 234, 63, 108, 246],
         }
     }
 }
@@ -111,7 +111,7 @@ impl InitRecipeInstructionData {
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct InitRecipeInstructionArgs {
+pub struct InitRecipeV1InstructionArgs {
     pub name: String,
     pub uri: String,
     pub max: u64,
@@ -124,7 +124,7 @@ pub struct InitRecipeInstructionArgs {
     pub path: u16,
 }
 
-/// Instruction builder for `InitRecipe`.
+/// Instruction builder for `InitRecipeV1`.
 ///
 /// ### Accounts:
 ///
@@ -136,9 +136,9 @@ pub struct InitRecipeInstructionArgs {
 ///   5. `[writable]` fee_ata
 ///   6. `[optional]` system_program (default to `11111111111111111111111111111111`)
 ///   7. `[optional]` token_program (default to `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA`)
-///   8. `[]` associated_token_program
+///   8. `[optional]` associated_token_program (default to `ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL`)
 #[derive(Default)]
-pub struct InitRecipeBuilder {
+pub struct InitRecipeV1Builder {
     recipe: Option<solana_program::pubkey::Pubkey>,
     authority: Option<solana_program::pubkey::Pubkey>,
     collection: Option<solana_program::pubkey::Pubkey>,
@@ -161,7 +161,7 @@ pub struct InitRecipeBuilder {
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
-impl InitRecipeBuilder {
+impl InitRecipeV1Builder {
     pub fn new() -> Self {
         Self::default()
     }
@@ -208,6 +208,7 @@ impl InitRecipeBuilder {
         self.token_program = Some(token_program);
         self
     }
+    /// `[optional account, default to 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL']`
     #[inline(always)]
     pub fn associated_token_program(
         &mut self,
@@ -286,7 +287,7 @@ impl InitRecipeBuilder {
     }
     #[allow(clippy::clone_on_copy)]
     pub fn instruction(&self) -> solana_program::instruction::Instruction {
-        let accounts = InitRecipe {
+        let accounts = InitRecipeV1 {
             recipe: self.recipe.expect("recipe is not set"),
             authority: self.authority.expect("authority is not set"),
             collection: self.collection.expect("collection is not set"),
@@ -299,11 +300,11 @@ impl InitRecipeBuilder {
             token_program: self.token_program.unwrap_or(solana_program::pubkey!(
                 "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
             )),
-            associated_token_program: self
-                .associated_token_program
-                .expect("associated_token_program is not set"),
+            associated_token_program: self.associated_token_program.unwrap_or(
+                solana_program::pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
+            ),
         };
-        let args = InitRecipeInstructionArgs {
+        let args = InitRecipeV1InstructionArgs {
             name: self.name.clone().expect("name is not set"),
             uri: self.uri.clone().expect("uri is not set"),
             max: self.max.clone().expect("max is not set"),
@@ -332,8 +333,8 @@ impl InitRecipeBuilder {
     }
 }
 
-/// `init_recipe` CPI accounts.
-pub struct InitRecipeCpiAccounts<'a, 'b> {
+/// `init_recipe_v1` CPI accounts.
+pub struct InitRecipeV1CpiAccounts<'a, 'b> {
     pub recipe: &'b solana_program::account_info::AccountInfo<'a>,
 
     pub authority: &'b solana_program::account_info::AccountInfo<'a>,
@@ -353,8 +354,8 @@ pub struct InitRecipeCpiAccounts<'a, 'b> {
     pub associated_token_program: &'b solana_program::account_info::AccountInfo<'a>,
 }
 
-/// `init_recipe` CPI instruction.
-pub struct InitRecipeCpi<'a, 'b> {
+/// `init_recipe_v1` CPI instruction.
+pub struct InitRecipeV1Cpi<'a, 'b> {
     /// The program to invoke.
     pub __program: &'b solana_program::account_info::AccountInfo<'a>,
 
@@ -376,14 +377,14 @@ pub struct InitRecipeCpi<'a, 'b> {
 
     pub associated_token_program: &'b solana_program::account_info::AccountInfo<'a>,
     /// The arguments for the instruction.
-    pub __args: InitRecipeInstructionArgs,
+    pub __args: InitRecipeV1InstructionArgs,
 }
 
-impl<'a, 'b> InitRecipeCpi<'a, 'b> {
+impl<'a, 'b> InitRecipeV1Cpi<'a, 'b> {
     pub fn new(
         program: &'b solana_program::account_info::AccountInfo<'a>,
-        accounts: InitRecipeCpiAccounts<'a, 'b>,
-        args: InitRecipeInstructionArgs,
+        accounts: InitRecipeV1CpiAccounts<'a, 'b>,
+        args: InitRecipeV1InstructionArgs,
     ) -> Self {
         Self {
             __program: program,
@@ -476,7 +477,7 @@ impl<'a, 'b> InitRecipeCpi<'a, 'b> {
                 is_writable: remaining_account.2,
             })
         });
-        let mut data = InitRecipeInstructionData::new().try_to_vec().unwrap();
+        let mut data = InitRecipeV1InstructionData::new().try_to_vec().unwrap();
         let mut args = self.__args.try_to_vec().unwrap();
         data.append(&mut args);
 
@@ -508,7 +509,7 @@ impl<'a, 'b> InitRecipeCpi<'a, 'b> {
     }
 }
 
-/// Instruction builder for `InitRecipe` via CPI.
+/// Instruction builder for `InitRecipeV1` via CPI.
 ///
 /// ### Accounts:
 ///
@@ -521,13 +522,13 @@ impl<'a, 'b> InitRecipeCpi<'a, 'b> {
 ///   6. `[]` system_program
 ///   7. `[]` token_program
 ///   8. `[]` associated_token_program
-pub struct InitRecipeCpiBuilder<'a, 'b> {
-    instruction: Box<InitRecipeCpiBuilderInstruction<'a, 'b>>,
+pub struct InitRecipeV1CpiBuilder<'a, 'b> {
+    instruction: Box<InitRecipeV1CpiBuilderInstruction<'a, 'b>>,
 }
 
-impl<'a, 'b> InitRecipeCpiBuilder<'a, 'b> {
+impl<'a, 'b> InitRecipeV1CpiBuilder<'a, 'b> {
     pub fn new(program: &'b solana_program::account_info::AccountInfo<'a>) -> Self {
-        let instruction = Box::new(InitRecipeCpiBuilderInstruction {
+        let instruction = Box::new(InitRecipeV1CpiBuilderInstruction {
             __program: program,
             recipe: None,
             authority: None,
@@ -713,7 +714,7 @@ impl<'a, 'b> InitRecipeCpiBuilder<'a, 'b> {
         &self,
         signers_seeds: &[&[&[u8]]],
     ) -> solana_program::entrypoint::ProgramResult {
-        let args = InitRecipeInstructionArgs {
+        let args = InitRecipeV1InstructionArgs {
             name: self.instruction.name.clone().expect("name is not set"),
             uri: self.instruction.uri.clone().expect("uri is not set"),
             max: self.instruction.max.clone().expect("max is not set"),
@@ -741,7 +742,7 @@ impl<'a, 'b> InitRecipeCpiBuilder<'a, 'b> {
                 .expect("sol_fee_amount_release is not set"),
             path: self.instruction.path.clone().expect("path is not set"),
         };
-        let instruction = InitRecipeCpi {
+        let instruction = InitRecipeV1Cpi {
             __program: self.instruction.__program,
 
             recipe: self.instruction.recipe.expect("recipe is not set"),
@@ -782,7 +783,7 @@ impl<'a, 'b> InitRecipeCpiBuilder<'a, 'b> {
     }
 }
 
-struct InitRecipeCpiBuilderInstruction<'a, 'b> {
+struct InitRecipeV1CpiBuilderInstruction<'a, 'b> {
     __program: &'b solana_program::account_info::AccountInfo<'a>,
     recipe: Option<&'b solana_program::account_info::AccountInfo<'a>>,
     authority: Option<&'b solana_program::account_info::AccountInfo<'a>>,

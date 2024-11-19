@@ -12,14 +12,16 @@ import {
 } from '@metaplex-foundation/umi/serializers';
 import { addCollectionPlugin, fetchAsset } from '@metaplex-foundation/mpl-core';
 import {
-  EscrowV1,
-  fetchEscrowV1,
-  initEscrowV1,
+  EscrowV2,
+  fetchEscrowV2,
+  fetchRecipeV1,
+  initEscrowV2,
+  initRecipeV1,
   MPL_HYBRID_PROGRAM_ID,
   Path,
-  releaseV1,
-} from '../src';
-import { createCoreCollection, createUmi } from './_setup';
+  releaseV2,
+} from '../../src';
+import { createCoreCollection, createUmi } from '../_setup';
 
 test('it can swap an asset for tokens', async (t) => {
   // Given a Umi instance using the project's plugin.
@@ -38,10 +40,17 @@ test('it can swap an asset for tokens', async (t) => {
     mint: tokenMint,
   }).sendAndConfirm(umi);
 
+  await initEscrowV2(umi, {}).sendAndConfirm(umi);
+
   const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
     string({ size: 'variable' }).serialize('escrow'),
-    publicKeySerializer().serialize(collection.publicKey),
+    publicKeySerializer().serialize(umi.identity.publicKey),
   ]);
+
+  t.like(await fetchEscrowV2(umi, escrow), <EscrowV2>{
+    authority: umi.identity.publicKey,
+    bump: escrow[1],
+  });
 
   await mintV1(umi, {
     mint: tokenMint.publicKey,
@@ -50,38 +59,45 @@ test('it can swap an asset for tokens', async (t) => {
     amount: 1000,
   }).sendAndConfirm(umi);
 
-  await initEscrowV1(umi, {
-    escrow,
+  await initRecipeV1(umi, {
     collection: collection.publicKey,
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 9,
     min: 0,
     amount: 5,
-    feeAmount: 1,
+    feeAmountCapture: 1,
+    feeAmountRelease: 0,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
     path: Path.RerollMetadata,
-    solFeeAmount: 1000000n,
   }).sendAndConfirm(umi);
 
-  const escrowData = await fetchEscrowV1(umi, escrow);
+  const recipe = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('recipe'),
+    publicKeySerializer().serialize(collection.publicKey),
+  ]);
 
-  t.like(escrowData, <EscrowV1>{
-    publicKey: publicKey(escrow),
+  t.like(await fetchRecipeV1(umi, recipe), {
+    publicKey: publicKey(recipe),
     collection: collection.publicKey,
+    authority: umi.identity.publicKey,
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 9n,
     min: 0n,
     amount: 5n,
-    feeAmount: 1n,
+    feeAmountCapture: 1n,
+    feeAmountRelease: 0n,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
     count: 1n,
     path: Path.RerollMetadata,
-    bump: escrow[1],
-    solFeeAmount: 1_000_000n,
+    bump: recipe[1],
   });
 
   const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
@@ -103,12 +119,13 @@ test('it can swap an asset for tokens', async (t) => {
 
   t.is(assets[0].owner, umi.identity.publicKey);
 
-  await releaseV1(umi, {
+  await releaseV2(umi, {
     owner: umi.identity,
+    recipe,
     escrow,
     asset: assets[0].publicKey,
     collection: collection.publicKey,
-    feeProjectAccount: escrowData.feeLocation,
+    feeProjectAccount: feeLocation.publicKey,
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
 
@@ -145,10 +162,17 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
     mint: tokenMint,
   }).sendAndConfirm(umi);
 
+  await initEscrowV2(umi, {}).sendAndConfirm(umi);
+
   const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
     string({ size: 'variable' }).serialize('escrow'),
-    publicKeySerializer().serialize(collection.publicKey),
+    publicKeySerializer().serialize(umi.identity.publicKey),
   ]);
+
+  t.like(await fetchEscrowV2(umi, escrow), <EscrowV2>{
+    authority: umi.identity.publicKey,
+    bump: escrow[1],
+  });
 
   await mintV1(umi, {
     mint: tokenMint.publicKey,
@@ -157,49 +181,54 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
     amount: 1000,
   }).sendAndConfirm(umi);
 
-  await initEscrowV1(umi, {
-    escrow,
+  await initRecipeV1(umi, {
     collection: collection.publicKey,
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 9,
     min: 0,
     amount: 5,
-    feeAmount: 1,
-    // eslint-disable-next-line no-bitwise
-    path: 1 << Path.RerollMetadata,
-    solFeeAmount: 1000000n,
+    feeAmountCapture: 1,
+    feeAmountRelease: 0,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
+    path: Path.RerollMetadata,
   }).sendAndConfirm(umi);
+
+  const recipe = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('recipe'),
+    publicKeySerializer().serialize(collection.publicKey),
+  ]);
 
   await addCollectionPlugin(umi, {
     collection: collection.publicKey,
     plugin: {
       type: 'UpdateDelegate',
       additionalDelegates: [],
-      authority: { type: 'Address', address: publicKey(escrow) },
+      authority: { type: 'Address', address: publicKey(recipe) },
     },
   }).sendAndConfirm(umi);
 
-  const escrowData = await fetchEscrowV1(umi, escrow);
-
-  t.like(escrowData, <EscrowV1>{
-    publicKey: publicKey(escrow),
+  t.like(await fetchRecipeV1(umi, recipe), {
+    publicKey: publicKey(recipe),
     collection: collection.publicKey,
+    authority: umi.identity.publicKey,
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 9n,
     min: 0n,
     amount: 5n,
-    feeAmount: 1n,
+    feeAmountCapture: 1n,
+    feeAmountRelease: 0n,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
     count: 1n,
-    // eslint-disable-next-line no-bitwise
-    path: 1 << Path.RerollMetadata,
-    bump: escrow[1],
-    solFeeAmount: 1_000_000n,
+    path: Path.RerollMetadata,
+    bump: recipe[1],
   });
 
   const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
@@ -221,13 +250,14 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
 
   t.is(assets[0].owner, umi.identity.publicKey);
 
-  await releaseV1(umi, {
+  await releaseV2(umi, {
     owner: umi.identity,
-    authority: escrow,
+    authority: recipe,
+    recipe,
     escrow,
     asset: assets[0].publicKey,
     collection: collection.publicKey,
-    feeProjectAccount: escrowData.feeLocation,
+    feeProjectAccount: feeLocation.publicKey,
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
 

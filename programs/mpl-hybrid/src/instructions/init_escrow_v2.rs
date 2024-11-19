@@ -3,7 +3,6 @@ use anchor_lang::{prelude::*, Discriminator};
 use mpl_utils::create_or_allocate_account_raw;
 use solana_program::program_memory::sol_memcpy;
 
-
 #[derive(Accounts)]
 pub struct InitEscrowV2Ctx<'info> {
     /// CHECK: This account is checked and initialized in the handler.
@@ -20,7 +19,7 @@ pub struct InitEscrowV2Ctx<'info> {
     #[account(mut)]
     authority: Signer<'info>,
 
-    system_program: Program<'info, System>
+    system_program: Program<'info, System>,
 }
 
 pub fn handler_init_escrow_v2(ctx: Context<InitEscrowV2Ctx>) -> Result<()> {
@@ -45,7 +44,7 @@ pub fn handler_init_escrow_v2(ctx: Context<InitEscrowV2Ctx>) -> Result<()> {
     escrow_data.extend(
         EscrowV2 {
             authority: authority.key(),
-            bump: ctx.bumps.escrow
+            bump: ctx.bumps.escrow,
         }
         .try_to_vec()?,
     );

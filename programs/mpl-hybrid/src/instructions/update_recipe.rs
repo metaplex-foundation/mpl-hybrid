@@ -75,7 +75,7 @@ pub fn handler_update_recipe_v1(
     // We can't allow the max to be less than the min.
     if ix.max <= ix.min {
         return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
-    }    
+    }
 
     let mut size_diff: isize = 0;
     recipe.authority = authority.key();
@@ -86,14 +86,14 @@ pub fn handler_update_recipe_v1(
             .len()
             .checked_sub(recipe.name.len())
             .ok_or(MplHybridError::NumericalOverflow)? as isize;
-            recipe.name = name;
+        recipe.name = name;
     }
     if let Some(uri) = ix.uri {
         size_diff += uri
             .len()
             .checked_sub(recipe.uri.len())
             .ok_or(MplHybridError::NumericalOverflow)? as isize;
-            recipe.uri = uri;
+        recipe.uri = uri;
     }
     if let Some(max) = ix.max {
         recipe.max = max;
@@ -115,7 +115,7 @@ pub fn handler_update_recipe_v1(
     }
     if let Some(sol_fee_amount_release) = ix.sol_fee_amount_release {
         recipe.sol_fee_amount_release = sol_fee_amount_release;
-    }    
+    }
     if let Some(path) = ix.path {
         recipe.path = path;
     }

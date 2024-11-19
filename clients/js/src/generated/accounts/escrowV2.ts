@@ -24,6 +24,7 @@ import {
   array,
   mapSerializer,
   publicKey as publicKeySerializer,
+  string,
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
@@ -139,4 +140,37 @@ export function getEscrowV2GpaBuilder(
 
 export function getEscrowV2Size(): number {
   return 41;
+}
+
+export function findEscrowV2Pda(
+  context: Pick<Context, 'eddsa' | 'programs'>,
+  seeds: {
+    /** The address of the authority */
+    authority: PublicKey;
+  }
+): Pda {
+  const programId = context.programs.getPublicKey(
+    'mplHybrid',
+    'MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb'
+  );
+  return context.eddsa.findPda(programId, [
+    string({ size: 'variable' }).serialize('escrow'),
+    publicKeySerializer().serialize(seeds.authority),
+  ]);
+}
+
+export async function fetchEscrowV2FromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findEscrowV2Pda>[1],
+  options?: RpcGetAccountOptions
+): Promise<EscrowV2> {
+  return fetchEscrowV2(context, findEscrowV2Pda(context, seeds), options);
+}
+
+export async function safeFetchEscrowV2FromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findEscrowV2Pda>[1],
+  options?: RpcGetAccountOptions
+): Promise<EscrowV2 | null> {
+  return safeFetchEscrowV2(context, findEscrowV2Pda(context, seeds), options);
 }

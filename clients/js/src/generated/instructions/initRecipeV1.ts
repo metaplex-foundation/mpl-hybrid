@@ -6,12 +6,14 @@
  * @see https://github.com/metaplex-foundation/kinobi
  */
 
+import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   Context,
   Pda,
   PublicKey,
   Signer,
   TransactionBuilder,
+  publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
 import {
@@ -24,28 +26,30 @@ import {
   u64,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findRecipeV1Pda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
+  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
 // Accounts.
-export type InitRecipeInstructionAccounts = {
-  recipe: PublicKey | Pda;
+export type InitRecipeV1InstructionAccounts = {
+  recipe?: PublicKey | Pda;
   authority?: Signer;
   collection: PublicKey | Pda;
   token: PublicKey | Pda;
   feeLocation: PublicKey | Pda;
   /** The ATA for token fees to be stored */
-  feeAta: PublicKey | Pda;
+  feeAta?: PublicKey | Pda;
   systemProgram?: PublicKey | Pda;
   tokenProgram?: PublicKey | Pda;
-  associatedTokenProgram: PublicKey | Pda;
+  associatedTokenProgram?: PublicKey | Pda;
 };
 
 // Data.
-export type InitRecipeInstructionData = {
+export type InitRecipeV1InstructionData = {
   discriminator: Array<number>;
   name: string;
   uri: string;
@@ -59,7 +63,7 @@ export type InitRecipeInstructionData = {
   path: number;
 };
 
-export type InitRecipeInstructionDataArgs = {
+export type InitRecipeV1InstructionDataArgs = {
   name: string;
   uri: string;
   max: number | bigint;
@@ -72,16 +76,16 @@ export type InitRecipeInstructionDataArgs = {
   path: number;
 };
 
-export function getInitRecipeInstructionDataSerializer(): Serializer<
-  InitRecipeInstructionDataArgs,
-  InitRecipeInstructionData
+export function getInitRecipeV1InstructionDataSerializer(): Serializer<
+  InitRecipeV1InstructionDataArgs,
+  InitRecipeV1InstructionData
 > {
   return mapSerializer<
-    InitRecipeInstructionDataArgs,
+    InitRecipeV1InstructionDataArgs,
     any,
-    InitRecipeInstructionData
+    InitRecipeV1InstructionData
   >(
-    struct<InitRecipeInstructionData>(
+    struct<InitRecipeV1InstructionData>(
       [
         ['discriminator', array(u8(), { size: 8 })],
         ['name', string()],
@@ -95,22 +99,22 @@ export function getInitRecipeInstructionDataSerializer(): Serializer<
         ['solFeeAmountRelease', u64()],
         ['path', u16()],
       ],
-      { description: 'InitRecipeInstructionData' }
+      { description: 'InitRecipeV1InstructionData' }
     ),
     (value) => ({
       ...value,
-      discriminator: [196, 35, 249, 242, 64, 106, 51, 53],
+      discriminator: [212, 22, 246, 254, 234, 63, 108, 246],
     })
-  ) as Serializer<InitRecipeInstructionDataArgs, InitRecipeInstructionData>;
+  ) as Serializer<InitRecipeV1InstructionDataArgs, InitRecipeV1InstructionData>;
 }
 
 // Args.
-export type InitRecipeInstructionArgs = InitRecipeInstructionDataArgs;
+export type InitRecipeV1InstructionArgs = InitRecipeV1InstructionDataArgs;
 
 // Instruction.
-export function initRecipe(
-  context: Pick<Context, 'identity' | 'programs'>,
-  input: InitRecipeInstructionAccounts & InitRecipeInstructionArgs
+export function initRecipeV1(
+  context: Pick<Context, 'eddsa' | 'identity' | 'programs'>,
+  input: InitRecipeV1InstructionAccounts & InitRecipeV1InstructionArgs
 ): TransactionBuilder {
   // Program ID.
   const programId = context.programs.getPublicKey(
@@ -168,11 +172,22 @@ export function initRecipe(
   } satisfies ResolvedAccountsWithIndices;
 
   // Arguments.
-  const resolvedArgs: InitRecipeInstructionArgs = { ...input };
+  const resolvedArgs: InitRecipeV1InstructionArgs = { ...input };
 
   // Default values.
+  if (!resolvedAccounts.recipe.value) {
+    resolvedAccounts.recipe.value = findRecipeV1Pda(context, {
+      collection: expectPublicKey(resolvedAccounts.collection.value),
+    });
+  }
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.feeAta.value) {
+    resolvedAccounts.feeAta.value = findAssociatedTokenPda(context, {
+      mint: expectPublicKey(resolvedAccounts.token.value),
+      owner: expectPublicKey(resolvedAccounts.feeLocation.value),
+    });
   }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(
@@ -188,6 +203,11 @@ export function initRecipe(
     );
     resolvedAccounts.tokenProgram.isWritable = false;
   }
+  if (!resolvedAccounts.associatedTokenProgram.value) {
+    resolvedAccounts.associatedTokenProgram.value = publicKey(
+      'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+    );
+  }
 
   // Accounts in order.
   const orderedAccounts: ResolvedAccount[] = Object.values(
@@ -202,8 +222,8 @@ export function initRecipe(
   );
 
   // Data.
-  const data = getInitRecipeInstructionDataSerializer().serialize(
-    resolvedArgs as InitRecipeInstructionDataArgs
+  const data = getInitRecipeV1InstructionDataSerializer().serialize(
+    resolvedArgs as InitRecipeV1InstructionDataArgs
   );
 
   // Bytes Created On Chain.

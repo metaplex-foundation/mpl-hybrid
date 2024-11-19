@@ -14,7 +14,7 @@ pub mod mpl_hybrid {
 
     use super::*;
 
-    pub fn init_recipe(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix) -> Result<()> {
+    pub fn init_recipe_v1(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix) -> Result<()> {
         init_recipe::handler_init_recipe_v1(ctx, ix)
     }
 
@@ -36,7 +36,7 @@ pub mod mpl_hybrid {
 
     pub fn capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
         capture_v2::handler_capture_v2(ctx)
-    }    
+    }
 
     pub fn release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         release::handler_release_v1(ctx)
@@ -44,7 +44,7 @@ pub mod mpl_hybrid {
 
     pub fn release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
         release_v2::handler_release_v2(ctx)
-    }    
+    }
 
     pub fn update_recipe_v1(ctx: Context<UpdateRecipeV1Ctx>, ix: UpdateRecipeV1Ix) -> Result<()> {
         update_recipe::handler_update_recipe_v1(ctx, ix)
@@ -65,7 +65,10 @@ pub mod mpl_hybrid {
         migrate_nft_v1::handler_migrate_nft_v1(ctx)
     }
 
-    pub fn migrate_tokens_v1(ctx: Context<MigrateTokensV1Ctx>, ix: MigrateTokensV1Ix) -> Result<()> {
-        migrate_tokens_v1::handler_migrate_tokens_v1(ctx,ix)
+    pub fn migrate_tokens_v1(
+        ctx: Context<MigrateTokensV1Ctx>,
+        ix: MigrateTokensV1Ix,
+    ) -> Result<()> {
+        migrate_tokens_v1::handler_migrate_tokens_v1(ctx, ix)
     }
 }

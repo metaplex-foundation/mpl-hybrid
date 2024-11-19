@@ -52,6 +52,31 @@ pub struct RecipeV1 {
 }
 
 impl RecipeV1 {
+    /// Prefix values used to generate a PDA for this account.
+    ///
+    /// Values are positional and appear in the following order:
+    ///
+    ///   0. `RecipeV1::PREFIX`
+    ///   1. collection (`Pubkey`)
+    pub const PREFIX: &'static [u8] = "recipe".as_bytes();
+
+    pub fn create_pda(
+        collection: Pubkey,
+        bump: u8,
+    ) -> Result<solana_program::pubkey::Pubkey, solana_program::pubkey::PubkeyError> {
+        solana_program::pubkey::Pubkey::create_program_address(
+            &["recipe".as_bytes(), collection.as_ref(), &[bump]],
+            &crate::MPL_HYBRID_ID,
+        )
+    }
+
+    pub fn find_pda(collection: &Pubkey) -> (solana_program::pubkey::Pubkey, u8) {
+        solana_program::pubkey::Pubkey::find_program_address(
+            &["recipe".as_bytes(), collection.as_ref()],
+            &crate::MPL_HYBRID_ID,
+        )
+    }
+
     #[inline(always)]
     pub fn from_bytes(data: &[u8]) -> Result<Self, std::io::Error> {
         let mut data = data;

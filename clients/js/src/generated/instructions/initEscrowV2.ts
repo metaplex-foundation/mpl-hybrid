@@ -21,15 +21,17 @@ import {
   struct,
   u8,
 } from '@metaplex-foundation/umi/serializers';
+import { findEscrowV2Pda } from '../accounts';
 import {
   ResolvedAccount,
   ResolvedAccountsWithIndices,
+  expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
 
 // Accounts.
 export type InitEscrowV2InstructionAccounts = {
-  escrow: PublicKey | Pda;
+  escrow?: PublicKey | Pda;
   authority?: Signer;
   systemProgram?: PublicKey | Pda;
 };
@@ -61,7 +63,7 @@ export function getInitEscrowV2InstructionDataSerializer(): Serializer<
 
 // Instruction.
 export function initEscrowV2(
-  context: Pick<Context, 'identity' | 'programs'>,
+  context: Pick<Context, 'eddsa' | 'identity' | 'programs'>,
   input: InitEscrowV2InstructionAccounts
 ): TransactionBuilder {
   // Program ID.
@@ -92,6 +94,11 @@ export function initEscrowV2(
   // Default values.
   if (!resolvedAccounts.authority.value) {
     resolvedAccounts.authority.value = context.identity;
+  }
+  if (!resolvedAccounts.escrow.value) {
+    resolvedAccounts.escrow.value = findEscrowV2Pda(context, {
+      authority: expectPublicKey(resolvedAccounts.authority.value),
+    });
   }
   if (!resolvedAccounts.systemProgram.value) {
     resolvedAccounts.systemProgram.value = context.programs.getPublicKey(

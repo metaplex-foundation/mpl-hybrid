@@ -202,3 +202,36 @@ export function getEscrowV1GpaBuilder(
     .deserializeUsing<EscrowV1>((account) => deserializeEscrowV1(account))
     .whereField('discriminator', [26, 90, 193, 218, 188, 251, 139, 211]);
 }
+
+export function findEscrowV1Pda(
+  context: Pick<Context, 'eddsa' | 'programs'>,
+  seeds: {
+    /** The address of the collection */
+    collection: PublicKey;
+  }
+): Pda {
+  const programId = context.programs.getPublicKey(
+    'mplHybrid',
+    'MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb'
+  );
+  return context.eddsa.findPda(programId, [
+    string({ size: 'variable' }).serialize('escrow'),
+    publicKeySerializer().serialize(seeds.collection),
+  ]);
+}
+
+export async function fetchEscrowV1FromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findEscrowV1Pda>[1],
+  options?: RpcGetAccountOptions
+): Promise<EscrowV1> {
+  return fetchEscrowV1(context, findEscrowV1Pda(context, seeds), options);
+}
+
+export async function safeFetchEscrowV1FromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findEscrowV1Pda>[1],
+  options?: RpcGetAccountOptions
+): Promise<EscrowV1 | null> {
+  return safeFetchEscrowV1(context, findEscrowV1Pda(context, seeds), options);
+}

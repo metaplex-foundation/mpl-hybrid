@@ -212,3 +212,36 @@ export function getRecipeV1GpaBuilder(
     .deserializeUsing<RecipeV1>((account) => deserializeRecipeV1(account))
     .whereField('discriminator', [137, 249, 37, 80, 19, 50, 78, 169]);
 }
+
+export function findRecipeV1Pda(
+  context: Pick<Context, 'eddsa' | 'programs'>,
+  seeds: {
+    /** The address of the collection */
+    collection: PublicKey;
+  }
+): Pda {
+  const programId = context.programs.getPublicKey(
+    'mplHybrid',
+    'MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb'
+  );
+  return context.eddsa.findPda(programId, [
+    string({ size: 'variable' }).serialize('recipe'),
+    publicKeySerializer().serialize(seeds.collection),
+  ]);
+}
+
+export async function fetchRecipeV1FromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findRecipeV1Pda>[1],
+  options?: RpcGetAccountOptions
+): Promise<RecipeV1> {
+  return fetchRecipeV1(context, findRecipeV1Pda(context, seeds), options);
+}
+
+export async function safeFetchRecipeV1FromSeeds(
+  context: Pick<Context, 'eddsa' | 'programs' | 'rpc'>,
+  seeds: Parameters<typeof findRecipeV1Pda>[1],
+  options?: RpcGetAccountOptions
+): Promise<RecipeV1 | null> {
+  return safeFetchRecipeV1(context, findRecipeV1Pda(context, seeds), options);
+}

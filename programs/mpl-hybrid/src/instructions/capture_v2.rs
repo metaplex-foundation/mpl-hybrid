@@ -43,7 +43,7 @@ pub struct CaptureV2Ctx<'info> {
         mut,
         seeds = [
             "escrow".as_bytes(), 
-            authority.key().as_ref()
+            recipe.authority.as_ref()
             ],
         bump=escrow.bump,
     )]
@@ -224,9 +224,9 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
         if authority_info.key == &recipe.authority {
             //invoke the update instruction
             update_ix.invoke()?;
-        } else if authority_info.key == &escrow.key() {
+        } else if authority_info.key == &recipe.key() {
             // The auth has been delegated as the UpdateDelegate on the asset.
-            update_ix.invoke_signed(&[&[b"escrow", authority.key.as_ref(), &[escrow.bump]]])?;
+            update_ix.invoke_signed(&[&[b"recipe", collection.key.as_ref(), &[recipe.bump]]])?;
         } else {
             return Err(MplHybridError::InvalidUpdateAuthority.into());
         }
@@ -248,8 +248,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
     };
 
     //invoke the transfer instruction with seeds
-    let _transfer_nft_result =
-        transfer_nft_ix.invoke_signed(&[&[b"escrow", authority.key.as_ref(), &[escrow.bump]]]);
+    transfer_nft_ix.invoke_signed(&[&[b"escrow", recipe.authority.as_ref(), &[escrow.bump]]])?;
 
     let cpi_program = token_program.to_account_info();
 
@@ -283,7 +282,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
     );
 
     //invoke protocol the transfer fee sol instruction
-    let _sol_fee_result = invoke(
+    invoke(
         &sol_fee_ix,
         &[owner.to_account_info(), fee_sol_account.to_account_info()],
     )?;
@@ -296,7 +295,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
     );
 
     //invoke project the transfer fee sol instruction for project
-    let _sol_fee_project_result = invoke(
+    invoke(
         &sol_fee_project_ix,
         &[
             owner.to_account_info(),

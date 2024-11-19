@@ -268,7 +268,7 @@ pub fn handler_capture_v1(ctx: Context<CaptureV1Ctx>) -> Result<()> {
     );
 
     //invoke protocol the transfer fee sol instruction
-    let _sol_fee_result = invoke(
+    invoke(
         &sol_fee_ix,
         &[owner.to_account_info(), fee_sol_account.to_account_info()],
     )?;
@@ -281,7 +281,7 @@ pub fn handler_capture_v1(ctx: Context<CaptureV1Ctx>) -> Result<()> {
     );
 
     //invoke project the transfer fee sol instruction for project
-    let _sol_fee_project_result = invoke(
+    invoke(
         &sol_fee_project_ix,
         &[
             owner.to_account_info(),

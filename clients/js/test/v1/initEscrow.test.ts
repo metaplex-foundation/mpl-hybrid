@@ -9,14 +9,14 @@ import {
   findAssociatedTokenPda,
   SPL_ASSOCIATED_TOKEN_PROGRAM_ID,
 } from '@metaplex-foundation/mpl-toolbox';
-import { createCoreCollection, createUmi } from './_setup';
+import { createCoreCollection, createUmi } from '../_setup';
 import {
   EscrowV1,
   fetchEscrowV1,
   initEscrowV1,
   MPL_HYBRID_PROGRAM_ID,
   Path,
-} from '../src';
+} from '../../src';
 
 test('it can initialize the escrow', async (t) => {
   // Given a Umi instance using the project's plugin.
@@ -46,7 +46,7 @@ test('it can initialize the escrow', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 2,
     min: 1,
     amount: 3,
@@ -66,7 +66,7 @@ test('it can initialize the escrow', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 2n,
     min: 1n,
     amount: 3n,
@@ -106,7 +106,7 @@ test('it cannot use an invalid collection', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 2,
     min: 1,
     amount: 3,
@@ -184,7 +184,7 @@ test('it cannot set min higher than max', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 1,
     min: 2,
     amount: 3,

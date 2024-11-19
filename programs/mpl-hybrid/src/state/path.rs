@@ -2,11 +2,11 @@ use anchor_lang::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, AnchorSerialize, AnchorDeserialize)]
 pub enum Path {
-    RerollMetadata,
+    NoRerollMetadata,
 }
 
 impl Path {
     pub fn check(self, bits: u16) -> bool {
-        bits & (1 << (self as u16)) == 0
+        bits & (1 << (self as u16)) != 0
     }
 }

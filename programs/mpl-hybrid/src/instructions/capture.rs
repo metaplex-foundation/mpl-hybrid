@@ -165,7 +165,7 @@ pub fn handler_capture_v1(ctx: Context<CaptureV1Ctx>) -> Result<()> {
     }
 
     //If the path has bit 0 set, we need to update the metadata onchain
-    if Path::RerollMetadata.check(escrow.path) {
+    if !Path::NoRerollMetadata.check(escrow.path) {
         let clock = Clock::get()?;
         // seed for the random number is a combination of the slot_hash - timestamp
         let recent_slothashes = &ctx.accounts.recent_blockhashes;

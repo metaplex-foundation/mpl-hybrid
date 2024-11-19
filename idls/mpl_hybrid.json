@@ -1327,7 +1327,7 @@
         "kind": "enum",
         "variants": [
           {
-            "name": "RerollMetadata"
+            "name": "NoRerollMetadata"
           }
         ]
       }

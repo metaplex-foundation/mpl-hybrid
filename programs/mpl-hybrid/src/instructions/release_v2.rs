@@ -183,7 +183,7 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
     }
 
     //If the path has bit 0 set, we need to update the metadata onchain
-    if Path::RerollMetadata.check(recipe.path) {
+    if !Path::NoRerollMetadata.check(recipe.path) {
         //construct the captured uri
         let mut uri = recipe.uri.clone();
         let name = "Captured".to_string();

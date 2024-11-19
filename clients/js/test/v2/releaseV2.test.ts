@@ -272,7 +272,7 @@ test('it can swap an asset for tokens without reroll', async (t) => {
   t.is(assetAfter.owner, publicKey(escrow));
 
   // Make sure the URI has not changed.
-  t.is(assetAfter.uri, "https://example.com/asset");
+  t.is(assetAfter.uri, 'https://example.com/asset');
 });
 
 test('it can swap an asset for tokens as UpdateDelegate with reroll', async (t) => {
@@ -543,5 +543,5 @@ test('it can swap an asset for tokens as UpdateDelegate without reroll', async (
   t.is(assetAfter.owner, publicKey(escrow));
 
   // Make sure the URI has not changed.
-  t.is(assetAfter.uri, "https://example.com/asset");
+  t.is(assetAfter.uri, 'https://example.com/asset');
 });

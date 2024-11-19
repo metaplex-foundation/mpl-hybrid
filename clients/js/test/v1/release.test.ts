@@ -21,7 +21,7 @@ import {
 } from '../../src';
 import { createCoreCollection, createUmi } from '../_setup';
 
-test('it can swap an asset for tokens', async (t) => {
+test('it can swap an asset for tokens with reroll', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
   const feeLocation = generateSigner(umi);
@@ -56,7 +56,7 @@ test('it can swap an asset for tokens', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 9,
     min: 0,
     amount: 5,
@@ -73,7 +73,7 @@ test('it can swap an asset for tokens', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 9n,
     min: 0n,
     amount: 5n,
@@ -126,9 +126,12 @@ test('it can swap an asset for tokens', async (t) => {
   t.deepEqual(userTokenAfter.token.amount, 5n);
   const assetAfter = await fetchAsset(umi, assets[0].publicKey);
   t.is(assetAfter.owner, publicKey(escrow));
+
+  // Confirm that an asset in the escrow has the correct URI
+  t.is(assetAfter.uri, `${escrowData.uri}captured.json`);
 });
 
-test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
+test('it can swap an asset for tokens as UpdateDelegate with reroll', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
   const feeLocation = generateSigner(umi);
@@ -163,13 +166,12 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 9,
     min: 0,
     amount: 5,
     feeAmount: 1,
-    // eslint-disable-next-line no-bitwise
-    path: 1 << Path.RerollMetadata,
+    path: Path.RerollMetadata,
     solFeeAmount: 1000000n,
   }).sendAndConfirm(umi);
 
@@ -190,14 +192,13 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
     token: tokenMint.publicKey,
     feeLocation: feeLocation.publicKey,
     name: 'Test Escrow',
-    uri: 'www.test.com',
+    uri: 'www.test.com/',
     max: 9n,
     min: 0n,
     amount: 5n,
     feeAmount: 1n,
     count: 1n,
-    // eslint-disable-next-line no-bitwise
-    path: 1 << Path.RerollMetadata,
+    path: Path.RerollMetadata,
     bump: escrow[1],
     solFeeAmount: 1_000_000n,
   });
@@ -245,4 +246,7 @@ test('it can swap an asset for tokens as UpdateDelegate', async (t) => {
   t.deepEqual(userTokenAfter.token.amount, 5n);
   const assetAfter = await fetchAsset(umi, assets[0].publicKey);
   t.is(assetAfter.owner, publicKey(escrow));
+
+  // Confirm that an asset in the escrow has the correct URI
+  t.is(assetAfter.uri, `${escrowData.uri}captured.json`);
 });

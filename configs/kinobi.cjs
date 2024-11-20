@@ -17,6 +17,14 @@ kinobi.update(
     })
 );
 
+kinobi.update(
+    k.updateDefinedTypesVisitor({
+        Path: {
+            name: "InternalPath",
+        },
+    })
+);
+
 // Update Accounts.
 kinobi.update(
     k.updateAccountsVisitor({

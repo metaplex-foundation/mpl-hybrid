@@ -168,7 +168,7 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
     }
 
     //If the path has bit 0 set, we need to update the metadata onchain
-    if Path::RerollMetadata.check(escrow.path) {
+    if !Path::NoRerollMetadata.check(escrow.path) {
         //construct the captured uri
         let mut uri = escrow.uri.clone();
         let name = "Captured".to_string();

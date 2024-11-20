@@ -5,6 +5,6 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
-pub(crate) mod r#path;
+pub(crate) mod r#internal_path;
 
-pub use self::r#path::*;
+pub use self::r#internal_path::*;

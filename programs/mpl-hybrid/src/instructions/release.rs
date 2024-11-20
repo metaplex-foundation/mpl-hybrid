@@ -167,7 +167,7 @@ pub fn handler_release_v1(ctx: Context<ReleaseV1Ctx>) -> Result<()> {
         assert_signer(&ctx.accounts.authority)?;
     }
 
-    //If the path has bit 0 set, we need to update the metadata onchain
+    //If the path has bit 0 unset, we need to update the metadata onchain
     if !Path::NoRerollMetadata.check(escrow.path) {
         //construct the captured uri
         let mut uri = escrow.uri.clone();

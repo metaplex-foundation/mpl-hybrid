@@ -239,6 +239,32 @@ export class InvalidAuthorityError extends ProgramError {
 codeToErrorMap.set(0x1780, InvalidAuthorityError);
 nameToErrorMap.set('InvalidAuthority', InvalidAuthorityError);
 
+/** CaptureBlocked: Capture is blocked for this recipe */
+export class CaptureBlockedError extends ProgramError {
+  override readonly name: string = 'CaptureBlocked';
+
+  readonly code: number = 0x1781; // 6017
+
+  constructor(program: Program, cause?: Error) {
+    super('Capture is blocked for this recipe', program, cause);
+  }
+}
+codeToErrorMap.set(0x1781, CaptureBlockedError);
+nameToErrorMap.set('CaptureBlocked', CaptureBlockedError);
+
+/** ReleaseBlocked: Release is blocked for this recipe */
+export class ReleaseBlockedError extends ProgramError {
+  override readonly name: string = 'ReleaseBlocked';
+
+  readonly code: number = 0x1782; // 6018
+
+  constructor(program: Program, cause?: Error) {
+    super('Release is blocked for this recipe', program, cause);
+  }
+}
+codeToErrorMap.set(0x1782, ReleaseBlockedError);
+nameToErrorMap.set('ReleaseBlocked', ReleaseBlockedError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

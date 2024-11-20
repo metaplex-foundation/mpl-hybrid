@@ -32,7 +32,7 @@ pub struct RecipeV1 {
     pub count: u64,
     //1 onchain/offchain metadata update path
     pub path: u16,
-    //1 escrow bump
+    //1 recipe bump
     pub bump: u8,
 }
 

@@ -131,7 +131,7 @@ export function captureV2(
     },
     token: {
       index: 8,
-      isWritable: false as boolean,
+      isWritable: true as boolean,
       value: input.token ?? null,
     },
     feeTokenAccount: {

@@ -8,8 +8,8 @@ use anchor_lang::{
 };
 use anchor_lang::{prelude::*, system_program};
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token;
 use anchor_spl::token::Mint;
+use anchor_spl::token::{self, Burn};
 use anchor_spl::token::{Token, Transfer};
 use arrayref::array_ref;
 use mpl_core::accounts::BaseAssetV1;
@@ -69,6 +69,7 @@ pub struct CaptureV2Ctx<'info> {
 
     /// CHECK: This is a user defined account
     #[account(
+        mut,
         address = recipe.token @MplHybridError::InvalidMintAccount
     )]
     token: Account<'info, Mint>,
@@ -131,6 +132,10 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
         return Err(MplHybridError::InvalidAuthority.into());
     }
 
+    if Path::BlockCapture.check(recipe.path) {
+        return Err(MplHybridError::CaptureBlocked.into());
+    }
+
     // The user token account should already exist.
     validate_token_account(user_token_account, &owner.key(), &ctx.accounts.token.key())?;
 
@@ -179,7 +184,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
         assert_signer(authority)?;
     }
 
-    //If the path has bit 0 set, we need to update the metadata onchain
+    //If the path has bit 0 unset, we need to update the metadata onchain
     if !Path::NoRerollMetadata.check(recipe.path) {
         let clock = Clock::get()?;
         // seed for the random number is a combination of the slot_hash - timestamp
@@ -252,16 +257,32 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
 
     let cpi_program = token_program.to_account_info();
 
-    //create transfer token instruction
-    let cpi_accounts_transfer = Transfer {
-        from: user_token_account.to_account_info(),
-        to: escrow_token_account.to_account_info(),
-        authority: owner.to_account_info(),
-    };
+    // If the path has burn on capture, we burn the token
+    if Path::BurnOnCapture.check(recipe.path) {
+        //create burn instruction
+        let cpi_accounts_burn = Burn {
+            mint: ctx.accounts.token.to_account_info(),
+            from: user_token_account.to_account_info(),
+            authority: owner.to_account_info(),
+        };
 
-    let transfer_cpi_ctx = CpiContext::new(cpi_program.clone(), cpi_accounts_transfer);
+        let burn_cpi_ctx = CpiContext::new(cpi_program.clone(), cpi_accounts_burn);
 
-    token::transfer(transfer_cpi_ctx, recipe.amount)?;
+        token::burn(burn_cpi_ctx, recipe.amount)?;
+    }
+    // Otherwise, we transfer the token to the escrow
+    else {
+        //create transfer token instruction
+        let cpi_accounts_transfer = Transfer {
+            from: user_token_account.to_account_info(),
+            to: escrow_token_account.to_account_info(),
+            authority: owner.to_account_info(),
+        };
+
+        let transfer_cpi_ctx = CpiContext::new(cpi_program.clone(), cpi_accounts_transfer);
+
+        token::transfer(transfer_cpi_ctx, recipe.amount)?;
+    }
 
     //create transfer fee token instruction
     let cpi_accounts_fee_transfer = Transfer {

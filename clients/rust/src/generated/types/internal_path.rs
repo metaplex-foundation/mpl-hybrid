@@ -17,4 +17,8 @@ use num_derive::FromPrimitive;
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash, FromPrimitive)]
 pub enum InternalPath {
     NoRerollMetadata,
+    BlockCapture,
+    BlockRelease,
+    BurnOnCapture,
+    BurnOnRelease,
 }

@@ -324,7 +324,7 @@
         },
         {
           "name": "token",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1328,6 +1328,18 @@
         "variants": [
           {
             "name": "NoRerollMetadata"
+          },
+          {
+            "name": "BlockCapture"
+          },
+          {
+            "name": "BlockRelease"
+          },
+          {
+            "name": "BurnOnCapture"
+          },
+          {
+            "name": "BurnOnRelease"
           }
         ]
       }
@@ -1418,6 +1430,16 @@
       "code": 6016,
       "name": "InvalidAuthority",
       "msg": "Invalid Authorities"
+    },
+    {
+      "code": 6017,
+      "name": "CaptureBlocked",
+      "msg": "Capture is blocked for this recipe"
+    },
+    {
+      "code": 6018,
+      "name": "ReleaseBlocked",
+      "msg": "Release is blocked for this recipe"
     }
   ],
   "metadata": {

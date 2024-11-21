@@ -697,7 +697,7 @@ test('it cannot swap tokens for an asset with BlockCapture', async (t) => {
     token: tokenMint.publicKey,
   }).sendAndConfirm(umi);
 
-  await t.throwsAsync(result, { name: "CaptureBlocked" })
+  await t.throwsAsync(result, { name: 'CaptureBlocked' });
 });
 
 test('it can burn tokens for an asset with BurnOnCapture', async (t) => {

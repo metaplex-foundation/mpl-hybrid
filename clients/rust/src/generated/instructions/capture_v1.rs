@@ -154,7 +154,7 @@ impl CaptureV1InstructionData {
 ///   6. `[writable]` escrow_token_account
 ///   7. `[]` token
 ///   8. `[writable]` fee_token_account
-///   9. `[writable, optional]` fee_sol_account (default to `GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3`)
+///   9. `[writable, optional]` fee_sol_account (default to `C3iyKknpNPeZXQEVLkR8ZJxcgB8xdsqXkyrV1RwEmdrD`)
 ///   10. `[writable]` fee_project_account
 ///   11. `[optional]` recent_blockhashes (default to `SysvarS1otHashes111111111111111111111111111`)
 ///   12. `[optional]` mpl_core (default to `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d`)
@@ -244,7 +244,7 @@ impl CaptureV1Builder {
         self.fee_token_account = Some(fee_token_account);
         self
     }
-    /// `[optional account, default to 'GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3']`
+    /// `[optional account, default to 'C3iyKknpNPeZXQEVLkR8ZJxcgB8xdsqXkyrV1RwEmdrD']`
     #[inline(always)]
     pub fn fee_sol_account(
         &mut self,
@@ -334,7 +334,7 @@ impl CaptureV1Builder {
                 .fee_token_account
                 .expect("fee_token_account is not set"),
             fee_sol_account: self.fee_sol_account.unwrap_or(solana_program::pubkey!(
-                "GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3"
+                "C3iyKknpNPeZXQEVLkR8ZJxcgB8xdsqXkyrV1RwEmdrD"
             )),
             fee_project_account: self
                 .fee_project_account

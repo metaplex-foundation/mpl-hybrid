@@ -111,7 +111,6 @@ pub fn handler_update_escrow_v1(
     if let Some(path) = ix.path {
         // We can't allow the path to be set if the escrow has a swap count > 1.
         // Count is set at a starting value of 1 while initializing the escrow so 1 === no swaps.
-        msg!("escrow count: {}", escrow.count);
         if escrow.count > 1 && escrow.path != path {
             return Err(MplHybridError::PathCannotBeSet.into());
         }

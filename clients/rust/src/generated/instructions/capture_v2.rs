@@ -87,7 +87,7 @@ impl CaptureV2 {
             self.escrow_token_account,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_program::instruction::AccountMeta::new(
             self.token, false,
         ));
         accounts.push(solana_program::instruction::AccountMeta::new(
@@ -159,7 +159,7 @@ impl CaptureV2InstructionData {
 ///   5. `[writable]` collection
 ///   6. `[writable]` user_token_account
 ///   7. `[writable]` escrow_token_account
-///   8. `[]` token
+///   8. `[writable]` token
 ///   9. `[writable]` fee_token_account
 ///   10. `[writable, optional]` fee_sol_account (default to `C3iyKknpNPeZXQEVLkR8ZJxcgB8xdsqXkyrV1RwEmdrD`)
 ///   11. `[writable]` fee_project_account
@@ -543,7 +543,7 @@ impl<'a, 'b> CaptureV2Cpi<'a, 'b> {
             *self.escrow_token_account.key,
             false,
         ));
-        accounts.push(solana_program::instruction::AccountMeta::new_readonly(
+        accounts.push(solana_program::instruction::AccountMeta::new(
             *self.token.key,
             false,
         ));
@@ -636,7 +636,7 @@ impl<'a, 'b> CaptureV2Cpi<'a, 'b> {
 ///   5. `[writable]` collection
 ///   6. `[writable]` user_token_account
 ///   7. `[writable]` escrow_token_account
-///   8. `[]` token
+///   8. `[writable]` token
 ///   9. `[writable]` fee_token_account
 ///   10. `[writable]` fee_sol_account
 ///   11. `[writable]` fee_project_account

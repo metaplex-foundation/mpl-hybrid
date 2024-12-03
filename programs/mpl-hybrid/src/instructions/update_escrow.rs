@@ -109,6 +109,14 @@ pub fn handler_update_escrow_v1(
         escrow.sol_fee_amount = sol_fee_amount;
     }
     if let Some(path) = ix.path {
+        // We can't allow the path to be set if the escrow has a swap count > 1.
+        // Count is set at a starting value of 1 while initializing the escrow so 1 === no swaps.
+        if escrow.count > 1
+            && Path::NoRerollMetadata.check(escrow.path) != Path::NoRerollMetadata.check(path)
+        {
+            return Err(MplHybridError::PathCannotBeSet.into());
+        }
+
         escrow.path = path;
     }
 

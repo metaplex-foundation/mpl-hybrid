@@ -1418,6 +1418,11 @@
       "code": 6016,
       "name": "InvalidAuthority",
       "msg": "Invalid Authorities"
+    },
+    {
+      "code": 6017,
+      "name": "PathCannotBeSet",
+      "msg": "Path can not be set"
     }
   ],
   "metadata": {

@@ -152,7 +152,7 @@ test('it can update a recipe basic data', async (t) => {
   });
 });
 
-// recipe swap count is set at a starting value of 1 during escrow init. 1 === no swap
+// recipe swap count is set at a starting value of 1 during recipe init. 1 === no swap
 test('it can update a recipe path if recipe swap count === 1', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();
@@ -281,7 +281,7 @@ test('it can update a recipe path if recipe swap count === 1', async (t) => {
   });
 });
 
-// recipe swap count is set at a starting value of 1 during escrow init. 1 === no swap
+// recipe swap count is set at a starting value of 1 during recipe init. 1 === no swap
 test('it fails to update a recipe path if recipe swap count > 1', async (t) => {
   // Given a Umi instance using the project's plugin.
   const umi = await createUmi();

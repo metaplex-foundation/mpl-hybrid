@@ -1340,6 +1340,9 @@
           },
           {
             "name": "BurnOnRelease"
+          },
+          {
+            "name": "RerollMetadataV2"
           }
         ]
       }
@@ -1440,6 +1443,16 @@
       "code": 6018,
       "name": "ReleaseBlocked",
       "msg": "Release is blocked for this recipe"
+    },
+    {
+      "code": 6019,
+      "name": "IncompatiblePathSettings",
+      "msg": "Incompatible Path Settings"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidUri",
+      "msg": "Invalid URI"
     }
   ],
   "metadata": {

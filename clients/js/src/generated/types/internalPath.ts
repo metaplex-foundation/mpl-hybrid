@@ -14,6 +14,7 @@ export enum InternalPath {
   BlockRelease,
   BurnOnCapture,
   BurnOnRelease,
+  RerollMetadataV2,
 }
 
 export type InternalPathArgs = InternalPath;

@@ -67,6 +67,12 @@ pub enum MplHybridError {
     /// 6018 (0x1782) - Release is blocked for this recipe
     #[error("Release is blocked for this recipe")]
     ReleaseBlocked,
+    /// 6019 (0x1783) - Incompatible Path Settings
+    #[error("Incompatible Path Settings")]
+    IncompatiblePathSettings,
+    /// 6020 (0x1784) - Invalid URI
+    #[error("Invalid URI")]
+    InvalidUri,
 }
 
 impl solana_program::program_error::PrintProgramError for MplHybridError {

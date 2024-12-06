@@ -120,10 +120,18 @@ pub fn handler_update_recipe_v1(
         recipe.path = path;
     }
 
+    let tracker_size = if Path::RerollMetadataV2.check(recipe.path) {
+        ((collection_data.current_size >> 3) + 1) as usize
+    } else {
+        0
+    };
+
     let new_size = recipe
         .to_account_info()
         .data_len()
         .checked_add(size_diff as usize)
+        .ok_or(MplHybridError::NumericalOverflow)?
+        .checked_add(tracker_size)
         .ok_or(MplHybridError::NumericalOverflow)?;
     resize_or_reallocate_account_raw(
         &recipe.to_account_info(),

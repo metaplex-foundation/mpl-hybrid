@@ -7,6 +7,7 @@ pub enum Path {
     BlockRelease,
     BurnOnCapture,
     BurnOnRelease,
+    RerollMetadataV2,
 }
 
 impl Path {

@@ -21,4 +21,5 @@ pub enum InternalPath {
     BlockRelease,
     BurnOnCapture,
     BurnOnRelease,
+    RerollMetadataV2,
 }

@@ -65,19 +65,6 @@ pub struct InitRecipeV1Ctx<'info> {
 
 pub fn handler_init_recipe_v1(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix) -> Result<()> {
     let recipe = &mut ctx.accounts.recipe;
-    create_or_allocate_account_raw(
-        crate::ID,
-        recipe,
-        &ctx.accounts.system_program.to_account_info(),
-        &ctx.accounts.authority.to_account_info(),
-        RecipeV1::BASE_RECIPE_SIZE + ix.name.len() + ix.uri.len(),
-        &[
-            "recipe".as_bytes(),
-            &ctx.accounts.collection.key.to_bytes(),
-            &[ctx.bumps.recipe],
-        ],
-    )?;
-
     let collection = &mut ctx.accounts.collection;
     let authority = &mut ctx.accounts.authority;
     let token = &mut ctx.accounts.token;
@@ -86,6 +73,11 @@ pub fn handler_init_recipe_v1(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix)
     // We can't allow the max to be less than the min.
     if ix.max <= ix.min {
         return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+    }
+
+    // We can't have both RerollMetadata and RerollMetadataV2
+    if !Path::NoRerollMetadata.check(ix.path) && Path::RerollMetadataV2.check(ix.path) {
+        return Err(MplHybridError::IncompatiblePathSettings.into());
     }
 
     if *collection.owner != MPL_CORE
@@ -102,6 +94,36 @@ pub fn handler_init_recipe_v1(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix)
     if collection_data.update_authority != authority.key() {
         return Err(MplHybridError::InvalidCollectionAuthority.into());
     }
+
+    let recipe_size = if Path::RerollMetadataV2.check(ix.path) {
+        let collection_size = ((collection_data.current_size >> 3) + 1) as usize;
+        RecipeV1::BASE_RECIPE_SIZE
+            .checked_add(ix.name.len())
+            .ok_or(MplHybridError::NumericalOverflow)?
+            .checked_add(ix.uri.len())
+            .ok_or(MplHybridError::NumericalOverflow)?
+            .checked_add(collection_size)
+            .ok_or(MplHybridError::NumericalOverflow)?
+    } else {
+        RecipeV1::BASE_RECIPE_SIZE
+            .checked_add(ix.name.len())
+            .ok_or(MplHybridError::NumericalOverflow)?
+            .checked_add(ix.uri.len())
+            .ok_or(MplHybridError::NumericalOverflow)?
+    };
+
+    create_or_allocate_account_raw(
+        crate::ID,
+        recipe,
+        &ctx.accounts.system_program.to_account_info(),
+        &authority.to_account_info(),
+        recipe_size,
+        &[
+            "recipe".as_bytes(),
+            &collection.key.to_bytes(),
+            &[ctx.bumps.recipe],
+        ],
+    )?;
 
     //initialize with input data
     let mut recipe_data = RecipeV1::DISCRIMINATOR.to_vec();

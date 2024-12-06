@@ -265,6 +265,32 @@ export class ReleaseBlockedError extends ProgramError {
 codeToErrorMap.set(0x1782, ReleaseBlockedError);
 nameToErrorMap.set('ReleaseBlocked', ReleaseBlockedError);
 
+/** IncompatiblePathSettings: Incompatible Path Settings */
+export class IncompatiblePathSettingsError extends ProgramError {
+  override readonly name: string = 'IncompatiblePathSettings';
+
+  readonly code: number = 0x1783; // 6019
+
+  constructor(program: Program, cause?: Error) {
+    super('Incompatible Path Settings', program, cause);
+  }
+}
+codeToErrorMap.set(0x1783, IncompatiblePathSettingsError);
+nameToErrorMap.set('IncompatiblePathSettings', IncompatiblePathSettingsError);
+
+/** InvalidUri: Invalid URI */
+export class InvalidUriError extends ProgramError {
+  override readonly name: string = 'InvalidUri';
+
+  readonly code: number = 0x1784; // 6020
+
+  constructor(program: Program, cause?: Error) {
+    super('Invalid URI', program, cause);
+  }
+}
+codeToErrorMap.set(0x1784, InvalidUriError);
+nameToErrorMap.set('InvalidUri', InvalidUriError);
+
 /**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors

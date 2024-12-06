@@ -185,30 +185,64 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
     }
 
     //If the path has bit 0 unset, we need to update the metadata onchain
-    if !Path::NoRerollMetadata.check(recipe.path) {
+    if !Path::NoRerollMetadata.check(recipe.path) || Path::RerollMetadataV2.check(recipe.path) {
         let clock = Clock::get()?;
         // seed for the random number is a combination of the slot_hash - timestamp
         let recent_slothashes = &ctx.accounts.recent_blockhashes;
         let data = recent_slothashes.data.borrow();
-        let most_recent = array_ref![data, 12, 8];
 
-        let seed = u64::from_le_bytes(*most_recent)
-            .saturating_sub(clock.unix_timestamp as u64)
-            .wrapping_mul(recipe.count);
+        let (uri, name) = {
+            //construct the new uri
+            let mut uri = recipe.uri.clone();
+            let name = recipe.name.clone();
+            let json_extension = ".json".to_string();
+            let mut entropy = 0;
+            loop {
+                let most_recent = array_ref![data, 12 + entropy, 8];
 
-        // remainder is the random number between the min and max
-        let remainder = seed
-            .checked_rem(recipe.max - recipe.min)
-            .ok_or(MplHybridError::RandomnessError)?
-            + recipe.min;
+                let seed =
+                    u64::from_le_bytes(*most_recent).saturating_sub(clock.unix_timestamp as u64);
+                // .wrapping_mul(recipe.count);
 
-        //construct the new uri
-        let mut uri = recipe.uri.clone();
-        let name = recipe.name.clone();
-        let json_extension = ".json".to_string();
+                // remainder is the random number between the min and max
+                let remainder = seed
+                    .checked_rem((recipe.max - recipe.min) + 1)
+                    .ok_or(MplHybridError::RandomnessError)?
+                    + recipe.min;
 
-        uri.push_str(&remainder.to_string());
-        uri.push_str(&json_extension);
+                solana_program::msg!("remainder: {}", remainder);
+
+                // Calculate the bit and byte offset from the end of the account of `remainder`.
+                let account_data_len = recipe.to_account_info().data_len();
+                let byte_offset = (remainder >> 3) as usize;
+                let bit_offset: u8 = (remainder & 0b111) as u8;
+
+                // If the bit at the offset is 0, the URI is unused.
+                if !Path::NoRerollMetadata.check(recipe.path) {
+                    // Use the remainder as the new URI.
+                    uri.push_str(&remainder.to_string());
+                    uri.push_str(&json_extension);
+                    break;
+                } else if (recipe.to_account_info().try_borrow_data()?
+                    [account_data_len - byte_offset - 1]
+                    & (1 << bit_offset))
+                    == 0
+                {
+                    // Use the remainder as the new URI.
+                    uri.push_str(&remainder.to_string());
+                    uri.push_str(&json_extension);
+
+                    // Set the bit to 1 to mark it as used.
+                    recipe.to_account_info().try_borrow_mut_data()?
+                        [account_data_len - byte_offset - 1] |= 1 << bit_offset;
+                    break;
+                }
+
+                // Otherwise it's in use and we try the next entropy value.
+                entropy += 1;
+            }
+            (uri, name)
+        };
 
         //create update instruction
         let update_ix = UpdateV1Cpi {

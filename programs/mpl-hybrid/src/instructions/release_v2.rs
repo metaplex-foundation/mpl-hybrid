@@ -209,7 +209,28 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
     // Otherwise, we transfer the Asset to the escrow
     else {
         //If the path has bit 0 unset, we need to update the metadata onchain
-        if !Path::NoRerollMetadata.check(recipe.path) {
+        if !Path::NoRerollMetadata.check(recipe.path) || Path::RerollMetadataV2.check(recipe.path) {
+            // If it's RerollMetadataV2, we need to update the recipe data.
+            if Path::RerollMetadataV2.check(recipe.path) {
+                let account_data_len = recipe.to_account_info().data_len();
+                // Grab the number from the URI.
+                let number = asset_data
+                    .uri
+                    .split('/')
+                    .last()
+                    .ok_or(MplHybridError::InvalidUri)?
+                    .split('.')
+                    .next()
+                    .ok_or(MplHybridError::InvalidUri)?
+                    .parse::<u64>()
+                    .map_err(|_| MplHybridError::InvalidUri)?;
+                let byte_offset = (number >> 3) as usize;
+                let bit_offset: u8 = (number & 0b111) as u8;
+
+                recipe.to_account_info().try_borrow_mut_data()?
+                    [account_data_len - byte_offset - 1] &= !(1 << bit_offset);
+            }
+
             //construct the captured uri
             let mut uri = recipe.uri.clone();
             let name = "Captured".to_string();

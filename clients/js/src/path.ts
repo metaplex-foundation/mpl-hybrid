@@ -15,6 +15,10 @@ export type Path = InternalPath | CustomPath;
 export function buildPath(features: Path[]) {
   let path = 0;
 
+  if (features.includes(Path.RerollMetadataV2) && !features.includes(Path.NoRerollMetadata)) {
+    features.push(Path.NoRerollMetadata);
+  }
+
   // eslint-disable-next-line no-restricted-syntax
   for (const feature of features) {
     if (feature !== Path.RerollMetadata) {

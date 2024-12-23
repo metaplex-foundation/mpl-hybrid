@@ -117,6 +117,13 @@ pub fn handler_update_recipe_v1(
         recipe.sol_fee_amount_release = sol_fee_amount_release;
     }
     if let Some(path) = ix.path {
+        // We can't allow the path to be set if the recipe has a swap count > 1.
+        // Count is set at a starting value of 1 while initializing the recipe so 1 === no swaps.
+        if recipe.count > 1
+            && Path::NoRerollMetadata.check(recipe.path) != Path::NoRerollMetadata.check(path)
+        {
+            return Err(MplHybridError::PathCannotBeSet.into());
+        }
         recipe.path = path;
     }
 

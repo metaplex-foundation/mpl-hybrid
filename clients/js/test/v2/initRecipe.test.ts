@@ -12,6 +12,7 @@ import {
   initRecipeV1,
   MPL_HYBRID_PROGRAM_ID,
   Path,
+  RerollV2Setting,
 } from '../../src';
 
 test('it can initialize the recipe', async (t) => {
@@ -210,6 +211,7 @@ test('it can initialize the recipe with reroll v2', async (t) => {
     solFeeAmountCapture: 7,
     solFeeAmountRelease: 8,
     path: buildPath([Path.RerollMetadataV2]),
+    rerollV2Setting: RerollV2Setting.AllReleased,
   }).sendAndConfirm(umi);
 
   t.like(await fetchRecipeV1(umi, recipe), {

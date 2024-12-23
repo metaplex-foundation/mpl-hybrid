@@ -311,7 +311,7 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
     let sol_fee_ix = anchor_lang::solana_program::system_instruction::transfer(
         &owner.key(),
         &fee_sol_account.key(),
-        PROTOCOL_FEE,
+        get_protocol_fee()?,
     );
 
     //invoke the protocol transfer fee sol instruction

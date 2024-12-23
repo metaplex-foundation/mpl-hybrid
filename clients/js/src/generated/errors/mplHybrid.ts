@@ -239,57 +239,86 @@ export class InvalidAuthorityError extends ProgramError {
 codeToErrorMap.set(0x1780, InvalidAuthorityError);
 nameToErrorMap.set('InvalidAuthority', InvalidAuthorityError);
 
+/** PathCannotBeSet: Path can not be set */
+export class PathCannotBeSetError extends ProgramError {
+  override readonly name: string = 'PathCannotBeSet';
+
+  readonly code: number = 0x1781; // 6017
+
+  constructor(program: Program, cause?: Error) {
+    super('Path can not be set', program, cause);
+  }
+}
+codeToErrorMap.set(0x1781, PathCannotBeSetError);
+nameToErrorMap.set('PathCannotBeSet', PathCannotBeSetError);
+
 /** CaptureBlocked: Capture is blocked for this recipe */
 export class CaptureBlockedError extends ProgramError {
   override readonly name: string = 'CaptureBlocked';
 
-  readonly code: number = 0x1781; // 6017
+  readonly code: number = 0x1782; // 6018
 
   constructor(program: Program, cause?: Error) {
     super('Capture is blocked for this recipe', program, cause);
   }
 }
-codeToErrorMap.set(0x1781, CaptureBlockedError);
+codeToErrorMap.set(0x1782, CaptureBlockedError);
 nameToErrorMap.set('CaptureBlocked', CaptureBlockedError);
 
 /** ReleaseBlocked: Release is blocked for this recipe */
 export class ReleaseBlockedError extends ProgramError {
   override readonly name: string = 'ReleaseBlocked';
 
-  readonly code: number = 0x1782; // 6018
+  readonly code: number = 0x1783; // 6019
 
   constructor(program: Program, cause?: Error) {
     super('Release is blocked for this recipe', program, cause);
   }
 }
-codeToErrorMap.set(0x1782, ReleaseBlockedError);
+codeToErrorMap.set(0x1783, ReleaseBlockedError);
 nameToErrorMap.set('ReleaseBlocked', ReleaseBlockedError);
 
 /** IncompatiblePathSettings: Incompatible Path Settings */
 export class IncompatiblePathSettingsError extends ProgramError {
   override readonly name: string = 'IncompatiblePathSettings';
 
-  readonly code: number = 0x1783; // 6019
+  readonly code: number = 0x1784; // 6020
 
   constructor(program: Program, cause?: Error) {
     super('Incompatible Path Settings', program, cause);
   }
 }
-codeToErrorMap.set(0x1783, IncompatiblePathSettingsError);
+codeToErrorMap.set(0x1784, IncompatiblePathSettingsError);
 nameToErrorMap.set('IncompatiblePathSettings', IncompatiblePathSettingsError);
 
 /** InvalidUri: Invalid URI */
 export class InvalidUriError extends ProgramError {
   override readonly name: string = 'InvalidUri';
 
-  readonly code: number = 0x1784; // 6020
+  readonly code: number = 0x1785; // 6021
 
   constructor(program: Program, cause?: Error) {
     super('Invalid URI', program, cause);
   }
 }
-codeToErrorMap.set(0x1784, InvalidUriError);
+codeToErrorMap.set(0x1785, InvalidUriError);
 nameToErrorMap.set('InvalidUri', InvalidUriError);
+
+/** MustSpecifyRerollV2Setting: Must specify Reroll V2 Setting */
+export class MustSpecifyRerollV2SettingError extends ProgramError {
+  override readonly name: string = 'MustSpecifyRerollV2Setting';
+
+  readonly code: number = 0x1786; // 6022
+
+  constructor(program: Program, cause?: Error) {
+    super('Must specify Reroll V2 Setting', program, cause);
+  }
+}
+codeToErrorMap.set(0x1786, MustSpecifyRerollV2SettingError);
+nameToErrorMap.set(
+  'MustSpecifyRerollV2Setting',
+  MustSpecifyRerollV2SettingError
+);
 
 /**
  * Attempts to resolve a custom program error from the provided error code.

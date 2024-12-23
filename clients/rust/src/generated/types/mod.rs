@@ -6,5 +6,7 @@
 //!
 
 pub(crate) mod r#internal_path;
+pub(crate) mod r#reroll_v2_setting;
 
 pub use self::r#internal_path::*;
+pub use self::r#reroll_v2_setting::*;

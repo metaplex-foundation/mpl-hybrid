@@ -210,8 +210,6 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
                     .ok_or(MplHybridError::RandomnessError)?
                     + recipe.min;
 
-                solana_program::msg!("remainder: {}", remainder);
-
                 // Calculate the bit and byte offset from the end of the account of `remainder`.
                 let account_data_len = recipe.to_account_info().data_len();
                 let byte_offset = (remainder >> 3) as usize;
@@ -333,7 +331,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
     let sol_fee_ix = anchor_lang::solana_program::system_instruction::transfer(
         &owner.key(),
         &fee_sol_account.key(),
-        PROTOCOL_FEE,
+        get_protocol_fee()?,
     );
 
     //invoke protocol the transfer fee sol instruction

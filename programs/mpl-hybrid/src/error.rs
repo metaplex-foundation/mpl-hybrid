@@ -70,19 +70,27 @@ pub enum MplHybridError {
     #[msg("Invalid Authorities")]
     InvalidAuthority,
 
-    /// 6017 (0x1781) - Capture is blocked for this recipe
+    /// 6017 (0x1781) - Invalid Token Account Mint
+    #[msg("Path can not be set")]
+    PathCannotBeSet,
+
+    /// 6018 (0x1782) - Capture is blocked for this recipe
     #[msg("Capture is blocked for this recipe")]
     CaptureBlocked,
 
-    /// 6018 (0x1782) - Release is blocked for this recipe
+    /// 6019 (0x1783) - Release is blocked for this recipe
     #[msg("Release is blocked for this recipe")]
     ReleaseBlocked,
 
-    /// 6019 (0x1783) - Incompatible Path Settings
+    /// 6020 (0x1784) - Incompatible Path Settings
     #[msg("Incompatible Path Settings")]
     IncompatiblePathSettings,
 
-    /// 6020 (0x1784) - Invalid URI
+    /// 6021 (0x1785) - Invalid URI
     #[msg("Invalid URI")]
     InvalidUri,
+
+    /// 6022 (0x1786) - Must specify Reroll V2 Setting
+    #[msg("Must specify Reroll V2 Setting")]
+    MustSpecifyRerollV2Setting,
 }

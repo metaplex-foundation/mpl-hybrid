@@ -1125,6 +1125,14 @@
           {
             "name": "path",
             "type": "u16"
+          },
+          {
+            "name": "rerollV2Setting",
+            "type": {
+              "option": {
+                "defined": "RerollV2Setting"
+              }
+            }
           }
         ]
       }
@@ -1322,6 +1330,20 @@
       }
     },
     {
+      "name": "RerollV2Setting",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "AllCaptured"
+          },
+          {
+            "name": "AllReleased"
+          }
+        ]
+      }
+    },
+    {
       "name": "Path",
       "type": {
         "kind": "enum",
@@ -1436,23 +1458,33 @@
     },
     {
       "code": 6017,
+      "name": "PathCannotBeSet",
+      "msg": "Path can not be set"
+    },
+    {
+      "code": 6018,
       "name": "CaptureBlocked",
       "msg": "Capture is blocked for this recipe"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "ReleaseBlocked",
       "msg": "Release is blocked for this recipe"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "IncompatiblePathSettings",
       "msg": "Incompatible Path Settings"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "InvalidUri",
       "msg": "Invalid URI"
+    },
+    {
+      "code": 6022,
+      "name": "MustSpecifyRerollV2Setting",
+      "msg": "Must specify Reroll V2 Setting"
     }
   ],
   "metadata": {

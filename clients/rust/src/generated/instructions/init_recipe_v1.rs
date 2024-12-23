@@ -5,6 +5,7 @@
 //! [https://github.com/metaplex-foundation/kinobi]
 //!
 
+use crate::generated::types::RerollV2Setting;
 #[cfg(feature = "anchor")]
 use anchor_lang::prelude::{AnchorDeserialize, AnchorSerialize};
 #[cfg(not(feature = "anchor"))]
@@ -122,6 +123,7 @@ pub struct InitRecipeV1InstructionArgs {
     pub sol_fee_amount_capture: u64,
     pub sol_fee_amount_release: u64,
     pub path: u16,
+    pub reroll_v2_setting: Option<RerollV2Setting>,
 }
 
 /// Instruction builder for `InitRecipeV1`.
@@ -158,6 +160,7 @@ pub struct InitRecipeV1Builder {
     sol_fee_amount_capture: Option<u64>,
     sol_fee_amount_release: Option<u64>,
     path: Option<u16>,
+    reroll_v2_setting: Option<RerollV2Setting>,
     __remaining_accounts: Vec<solana_program::instruction::AccountMeta>,
 }
 
@@ -267,6 +270,12 @@ impl InitRecipeV1Builder {
         self.path = Some(path);
         self
     }
+    /// `[optional argument]`
+    #[inline(always)]
+    pub fn reroll_v2_setting(&mut self, reroll_v2_setting: RerollV2Setting) -> &mut Self {
+        self.reroll_v2_setting = Some(reroll_v2_setting);
+        self
+    }
     /// Add an aditional account to the instruction.
     #[inline(always)]
     pub fn add_remaining_account(
@@ -327,6 +336,7 @@ impl InitRecipeV1Builder {
                 .clone()
                 .expect("sol_fee_amount_release is not set"),
             path: self.path.clone().expect("path is not set"),
+            reroll_v2_setting: self.reroll_v2_setting.clone(),
         };
 
         accounts.instruction_with_remaining_accounts(args, &self.__remaining_accounts)
@@ -549,6 +559,7 @@ impl<'a, 'b> InitRecipeV1CpiBuilder<'a, 'b> {
             sol_fee_amount_capture: None,
             sol_fee_amount_release: None,
             path: None,
+            reroll_v2_setting: None,
             __remaining_accounts: Vec::new(),
         });
         Self { instruction }
@@ -673,6 +684,12 @@ impl<'a, 'b> InitRecipeV1CpiBuilder<'a, 'b> {
         self.instruction.path = Some(path);
         self
     }
+    /// `[optional argument]`
+    #[inline(always)]
+    pub fn reroll_v2_setting(&mut self, reroll_v2_setting: RerollV2Setting) -> &mut Self {
+        self.instruction.reroll_v2_setting = Some(reroll_v2_setting);
+        self
+    }
     /// Add an additional account to the instruction.
     #[inline(always)]
     pub fn add_remaining_account(
@@ -741,6 +758,7 @@ impl<'a, 'b> InitRecipeV1CpiBuilder<'a, 'b> {
                 .clone()
                 .expect("sol_fee_amount_release is not set"),
             path: self.instruction.path.clone().expect("path is not set"),
+            reroll_v2_setting: self.instruction.reroll_v2_setting.clone(),
         };
         let instruction = InitRecipeV1Cpi {
             __program: self.instruction.__program,
@@ -804,6 +822,7 @@ struct InitRecipeV1CpiBuilderInstruction<'a, 'b> {
     sol_fee_amount_capture: Option<u64>,
     sol_fee_amount_release: Option<u64>,
     path: Option<u16>,
+    reroll_v2_setting: Option<RerollV2Setting>,
     /// Additional instruction accounts `(AccountInfo, is_writable, is_signer)`.
     __remaining_accounts: Vec<(
         &'b solana_program::account_info::AccountInfo<'a>,

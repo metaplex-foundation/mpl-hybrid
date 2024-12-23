@@ -13,7 +13,8 @@ use anchor_spl::token::Mint;
 use anchor_spl::token::{Token, Transfer};
 use mpl_core::accounts::BaseAssetV1;
 use mpl_core::instructions::{
-    TransferV1Cpi, TransferV1InstructionArgs, UpdateV1Cpi, UpdateV1InstructionArgs,
+    BurnV1Cpi, BurnV1InstructionArgs, TransferV1Cpi, TransferV1InstructionArgs, UpdateV1Cpi,
+    UpdateV1InstructionArgs,
 };
 use mpl_core::types::UpdateAuthority;
 use mpl_utils::assert_signer;
@@ -132,6 +133,10 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
         return Err(MplHybridError::InvalidAuthority.into());
     }
 
+    if Path::BlockRelease.check(recipe.path) {
+        return Err(MplHybridError::ReleaseBlocked.into());
+    }
+
     // Create idempotent
     if user_token_account.owner == &system_program::ID {
         solana_program::msg!("Creating user token account");
@@ -182,60 +187,107 @@ pub fn handler_release_v2(ctx: Context<ReleaseV2Ctx>) -> Result<()> {
         assert_signer(authority)?;
     }
 
-    //If the path has bit 0 set, we need to update the metadata onchain
-    if !Path::NoRerollMetadata.check(recipe.path) {
-        //construct the captured uri
-        let mut uri = recipe.uri.clone();
-        let name = "Captured".to_string();
-        let json_extension = ".json";
-
-        uri.push_str("captured");
-        uri.push_str(json_extension);
-
-        //create update instruction
-        let update_ix = UpdateV1Cpi {
+    // If the path has burn on release, we burn the Asset
+    if Path::BurnOnRelease.check(recipe.path) {
+        //create burn instruction
+        let burn_nft_ix = BurnV1Cpi {
             __program: &mpl_core.to_account_info(),
             asset: &asset.to_account_info(),
             collection: Some(collection_info),
             payer: &owner.to_account_info(),
-            authority: Some(authority_info),
-            system_program: &system_program.to_account_info(),
+            authority: Some(owner_info),
+            system_program: Some(system_info),
             log_wrapper: None,
-            __args: UpdateV1InstructionArgs {
-                new_name: Some(name),
-                new_uri: Some(uri),
-                new_update_authority: None,
+            __args: BurnV1InstructionArgs {
+                compression_proof: None,
             },
         };
 
-        if authority_info.key == &recipe.authority {
-            //invoke the update instruction
-            update_ix.invoke()?;
-        } else if authority_info.key == &recipe.key() {
-            // The auth has been delegated as the UpdateDelegate on the asset.
-            update_ix.invoke_signed(&[&[b"recipe", collection.key.as_ref(), &[recipe.bump]]])?;
-        } else {
-            return Err(MplHybridError::InvalidUpdateAuthority.into());
-        }
+        //invoke the burn instruction
+        burn_nft_ix.invoke()?;
     }
+    // Otherwise, we transfer the Asset to the escrow
+    else {
+        //If the path has bit 0 unset, we need to update the metadata onchain
+        if !Path::NoRerollMetadata.check(recipe.path) || Path::RerollMetadataV2.check(recipe.path) {
+            // If it's RerollMetadataV2, we need to update the recipe data.
+            if Path::RerollMetadataV2.check(recipe.path) {
+                let account_data_len = recipe.to_account_info().data_len();
+                // Grab the number from the URI.
+                let number = asset_data
+                    .uri
+                    .split('/')
+                    .last()
+                    .ok_or(MplHybridError::InvalidUri)?
+                    .split('.')
+                    .next()
+                    .ok_or(MplHybridError::InvalidUri)?
+                    .parse::<u64>()
+                    .map_err(|_| MplHybridError::InvalidUri)?;
+                let byte_offset = (number >> 3) as usize;
+                let bit_offset: u8 = (number & 0b111) as u8;
 
-    //create transfer instruction
-    let transfer_nft_ix = TransferV1Cpi {
-        __program: &mpl_core.to_account_info(),
-        asset: &asset.to_account_info(),
-        collection: Some(collection_info),
-        payer: &owner.to_account_info(),
-        authority: Some(owner_info),
-        new_owner: &escrow.to_account_info(),
-        system_program: Some(system_info),
-        log_wrapper: None,
-        __args: TransferV1InstructionArgs {
-            compression_proof: None,
-        },
-    };
+                recipe.to_account_info().try_borrow_mut_data()?
+                    [account_data_len - byte_offset - 1] &= !(1 << bit_offset);
+            }
 
-    //invoke the transfer instruction
-    transfer_nft_ix.invoke()?;
+            //construct the captured uri
+            let mut uri = recipe.uri.clone();
+            let name = "Captured".to_string();
+            let json_extension = ".json";
+
+            uri.push_str("captured");
+            uri.push_str(json_extension);
+
+            //create update instruction
+            let update_ix = UpdateV1Cpi {
+                __program: &mpl_core.to_account_info(),
+                asset: &asset.to_account_info(),
+                collection: Some(collection_info),
+                payer: &owner.to_account_info(),
+                authority: Some(authority_info),
+                system_program: &system_program.to_account_info(),
+                log_wrapper: None,
+                __args: UpdateV1InstructionArgs {
+                    new_name: Some(name),
+                    new_uri: Some(uri),
+                    new_update_authority: None,
+                },
+            };
+
+            if authority_info.key == &recipe.authority {
+                //invoke the update instruction
+                update_ix.invoke()?;
+            } else if authority_info.key == &recipe.key() {
+                // The auth has been delegated as the UpdateDelegate on the asset.
+                update_ix.invoke_signed(&[&[
+                    b"recipe",
+                    collection.key.as_ref(),
+                    &[recipe.bump],
+                ]])?;
+            } else {
+                return Err(MplHybridError::InvalidUpdateAuthority.into());
+            }
+        }
+
+        //create transfer instruction
+        let transfer_nft_ix = TransferV1Cpi {
+            __program: &mpl_core.to_account_info(),
+            asset: &asset.to_account_info(),
+            collection: Some(collection_info),
+            payer: &owner.to_account_info(),
+            authority: Some(owner_info),
+            new_owner: &escrow.to_account_info(),
+            system_program: Some(system_info),
+            log_wrapper: None,
+            __args: TransferV1InstructionArgs {
+                compression_proof: None,
+            },
+        };
+
+        //invoke the transfer instruction
+        transfer_nft_ix.invoke()?;
+    }
 
     //create transfer token instruction
     let cpi_program = token_program.to_account_info();

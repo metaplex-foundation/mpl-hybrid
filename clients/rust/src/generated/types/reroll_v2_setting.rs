@@ -15,11 +15,7 @@ use num_derive::FromPrimitive;
 #[cfg_attr(not(feature = "anchor"), derive(BorshSerialize, BorshDeserialize))]
 #[cfg_attr(feature = "anchor", derive(AnchorSerialize, AnchorDeserialize))]
 #[derive(Clone, Debug, Eq, PartialEq, PartialOrd, Hash, FromPrimitive)]
-pub enum InternalPath {
-    NoRerollMetadata,
-    BlockCapture,
-    BlockRelease,
-    BurnOnCapture,
-    BurnOnRelease,
-    RerollMetadataV2,
+pub enum RerollV2Setting {
+    AllCaptured,
+    AllReleased,
 }

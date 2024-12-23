@@ -10,6 +10,11 @@ import { Serializer, scalarEnum } from '@metaplex-foundation/umi/serializers';
 
 export enum InternalPath {
   NoRerollMetadata,
+  BlockCapture,
+  BlockRelease,
+  BurnOnCapture,
+  BurnOnRelease,
+  RerollMetadataV2,
 }
 
 export type InternalPathArgs = InternalPath;

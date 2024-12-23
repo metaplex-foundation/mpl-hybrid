@@ -9,10 +9,13 @@
 import { findAssociatedTokenPda } from '@metaplex-foundation/mpl-toolbox';
 import {
   Context,
+  Option,
+  OptionOrNullable,
   Pda,
   PublicKey,
   Signer,
   TransactionBuilder,
+  none,
   publicKey,
   transactionBuilder,
 } from '@metaplex-foundation/umi';
@@ -20,6 +23,7 @@ import {
   Serializer,
   array,
   mapSerializer,
+  option,
   string,
   struct,
   u16,
@@ -33,6 +37,11 @@ import {
   expectPublicKey,
   getAccountMetasAndSigners,
 } from '../shared';
+import {
+  RerollV2Setting,
+  RerollV2SettingArgs,
+  getRerollV2SettingSerializer,
+} from '../types';
 
 // Accounts.
 export type InitRecipeV1InstructionAccounts = {
@@ -61,6 +70,7 @@ export type InitRecipeV1InstructionData = {
   solFeeAmountCapture: bigint;
   solFeeAmountRelease: bigint;
   path: number;
+  rerollV2Setting: Option<RerollV2Setting>;
 };
 
 export type InitRecipeV1InstructionDataArgs = {
@@ -74,6 +84,7 @@ export type InitRecipeV1InstructionDataArgs = {
   solFeeAmountCapture: number | bigint;
   solFeeAmountRelease: number | bigint;
   path: number;
+  rerollV2Setting?: OptionOrNullable<RerollV2SettingArgs>;
 };
 
 export function getInitRecipeV1InstructionDataSerializer(): Serializer<
@@ -98,12 +109,14 @@ export function getInitRecipeV1InstructionDataSerializer(): Serializer<
         ['solFeeAmountCapture', u64()],
         ['solFeeAmountRelease', u64()],
         ['path', u16()],
+        ['rerollV2Setting', option(getRerollV2SettingSerializer())],
       ],
       { description: 'InitRecipeV1InstructionData' }
     ),
     (value) => ({
       ...value,
       discriminator: [212, 22, 246, 254, 234, 63, 108, 246],
+      rerollV2Setting: value.rerollV2Setting ?? none(),
     })
   ) as Serializer<InitRecipeV1InstructionDataArgs, InitRecipeV1InstructionData>;
 }

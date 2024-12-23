@@ -7,3 +7,4 @@
  */
 
 export * from './internalPath';
+export * from './rerollV2Setting';

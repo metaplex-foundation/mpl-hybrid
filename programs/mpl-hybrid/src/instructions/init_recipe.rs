@@ -8,7 +8,17 @@ use mpl_core::accounts::BaseCollectionV1;
 use mpl_core::load_key;
 use mpl_core::types::Key as MplCoreKey;
 use mpl_utils::create_or_allocate_account_raw;
-use solana_program::program_memory::sol_memcpy;
+use solana_program::program_memory::{sol_memcpy, sol_memset};
+
+#[derive(AnchorSerialize, AnchorDeserialize, PartialEq, Eq)]
+pub enum RerollV2Setting {
+    /// The escrow begins with all assets inside of it. This means the reroll V2
+    /// bitmask will be all 1s.
+    AllCaptured,
+    /// The escrow begins with no assets inside of it. This means the reroll V2
+    /// bitmask will be all 0s.
+    AllReleased,
+}
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct InitRecipeV1Ix {
@@ -22,6 +32,7 @@ pub struct InitRecipeV1Ix {
     sol_fee_amount_capture: u64,
     sol_fee_amount_release: u64,
     path: u16,
+    reroll_v2_setting: Option<RerollV2Setting>,
 }
 
 #[derive(Accounts)]
@@ -65,19 +76,6 @@ pub struct InitRecipeV1Ctx<'info> {
 
 pub fn handler_init_recipe_v1(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix) -> Result<()> {
     let recipe = &mut ctx.accounts.recipe;
-    create_or_allocate_account_raw(
-        crate::ID,
-        recipe,
-        &ctx.accounts.system_program.to_account_info(),
-        &ctx.accounts.authority.to_account_info(),
-        RecipeV1::BASE_RECIPE_SIZE + ix.name.len() + ix.uri.len(),
-        &[
-            "recipe".as_bytes(),
-            &ctx.accounts.collection.key.to_bytes(),
-            &[ctx.bumps.recipe],
-        ],
-    )?;
-
     let collection = &mut ctx.accounts.collection;
     let authority = &mut ctx.accounts.authority;
     let token = &mut ctx.accounts.token;
@@ -86,6 +84,11 @@ pub fn handler_init_recipe_v1(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix)
     // We can't allow the max to be less than the min.
     if ix.max <= ix.min {
         return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+    }
+
+    // We can't have both RerollMetadata and RerollMetadataV2
+    if !Path::NoRerollMetadata.check(ix.path) && Path::RerollMetadataV2.check(ix.path) {
+        return Err(MplHybridError::IncompatiblePathSettings.into());
     }
 
     if *collection.owner != MPL_CORE
@@ -102,6 +105,47 @@ pub fn handler_init_recipe_v1(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix)
     if collection_data.update_authority != authority.key() {
         return Err(MplHybridError::InvalidCollectionAuthority.into());
     }
+
+    let (recipe_size, base_size, collection_size) = if Path::RerollMetadataV2.check(ix.path) {
+        // If RerollMetadataV2 is used, we need to have an argument for the reroll V2 setting.
+        if ix.reroll_v2_setting.is_none() {
+            return Err(MplHybridError::MustSpecifyRerollV2Setting.into());
+        }
+
+        let collection_size = ((collection_data.current_size >> 3) + 1) as usize;
+        let base_size = RecipeV1::BASE_RECIPE_SIZE
+            .checked_add(ix.name.len())
+            .ok_or(MplHybridError::NumericalOverflow)?
+            .checked_add(ix.uri.len())
+            .ok_or(MplHybridError::NumericalOverflow)?;
+        (
+            base_size
+                .checked_add(collection_size)
+                .ok_or(MplHybridError::NumericalOverflow)?,
+            base_size,
+            collection_size,
+        )
+    } else {
+        let base_size = RecipeV1::BASE_RECIPE_SIZE
+            .checked_add(ix.name.len())
+            .ok_or(MplHybridError::NumericalOverflow)?
+            .checked_add(ix.uri.len())
+            .ok_or(MplHybridError::NumericalOverflow)?;
+        (base_size, base_size, 0)
+    };
+
+    create_or_allocate_account_raw(
+        crate::ID,
+        recipe,
+        &ctx.accounts.system_program.to_account_info(),
+        &authority.to_account_info(),
+        recipe_size,
+        &[
+            "recipe".as_bytes(),
+            &collection.key.to_bytes(),
+            &[ctx.bumps.recipe],
+        ],
+    )?;
 
     //initialize with input data
     let mut recipe_data = RecipeV1::DISCRIMINATOR.to_vec();
@@ -129,6 +173,16 @@ pub fn handler_init_recipe_v1(ctx: Context<InitRecipeV1Ctx>, ix: InitRecipeV1Ix)
 
     let mut recipe_data_borrowed = recipe.data.borrow_mut();
     sol_memcpy(&mut recipe_data_borrowed, &recipe_data, recipe_data.len());
+
+    if Path::RerollMetadataV2.check(ix.path)
+        && ix.reroll_v2_setting == Some(RerollV2Setting::AllCaptured)
+    {
+        sol_memset(
+            &mut recipe_data_borrowed[base_size..],
+            0xFF,
+            collection_size,
+        );
+    }
 
     Ok(())
 }

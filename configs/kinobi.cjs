@@ -120,6 +120,11 @@ kinobi.update(
                 associatedTokenProgram: {
                     defaultValue: k.publicKeyValueNode("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
                 }
+            },
+            arguments: {
+                rerollV2Setting: {
+                    defaultValue: k.noneValueNode(),
+                }
             }
         },
         captureV2: {

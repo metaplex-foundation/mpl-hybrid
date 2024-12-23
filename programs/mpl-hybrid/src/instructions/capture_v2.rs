@@ -8,8 +8,8 @@ use anchor_lang::{
 };
 use anchor_lang::{prelude::*, system_program};
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token;
 use anchor_spl::token::Mint;
+use anchor_spl::token::{self, Burn};
 use anchor_spl::token::{Token, Transfer};
 use arrayref::array_ref;
 use mpl_core::accounts::BaseAssetV1;
@@ -69,6 +69,7 @@ pub struct CaptureV2Ctx<'info> {
 
     /// CHECK: This is a user defined account
     #[account(
+        mut,
         address = recipe.token @MplHybridError::InvalidMintAccount
     )]
     token: Account<'info, Mint>,
@@ -131,6 +132,10 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
         return Err(MplHybridError::InvalidAuthority.into());
     }
 
+    if Path::BlockCapture.check(recipe.path) {
+        return Err(MplHybridError::CaptureBlocked.into());
+    }
+
     // The user token account should already exist.
     validate_token_account(user_token_account, &owner.key(), &ctx.accounts.token.key())?;
 
@@ -179,31 +184,63 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
         assert_signer(authority)?;
     }
 
-    //If the path has bit 0 set, we need to update the metadata onchain
-    if !Path::NoRerollMetadata.check(recipe.path) {
+    //If the path has bit 0 unset, we need to update the metadata onchain
+    if !Path::NoRerollMetadata.check(recipe.path) || Path::RerollMetadataV2.check(recipe.path) {
         let clock = Clock::get()?;
         // seed for the random number is a combination of the slot_hash - timestamp
         let recent_slothashes = &ctx.accounts.recent_blockhashes;
         let data = recent_slothashes.data.borrow();
-        let most_recent = array_ref![data, 12, 8];
 
-        let seed = u64::from_le_bytes(*most_recent)
-            .saturating_sub(clock.unix_timestamp as u64)
-            .wrapping_mul(recipe.count);
+        let (uri, name) = {
+            //construct the new uri
+            let mut uri = recipe.uri.clone();
+            let name = recipe.name.clone();
+            let json_extension = ".json".to_string();
+            let mut entropy = 0;
+            loop {
+                let most_recent = array_ref![data, 12 + entropy, 8];
 
-        // remainder is the random number between the min and max
-        let remainder = seed
-            .checked_rem(recipe.max - recipe.min)
-            .ok_or(MplHybridError::RandomnessError)?
-            + recipe.min;
+                let seed =
+                    u64::from_le_bytes(*most_recent).saturating_sub(clock.unix_timestamp as u64);
+                // .wrapping_mul(recipe.count);
 
-        //construct the new uri
-        let mut uri = recipe.uri.clone();
-        let name = recipe.name.clone();
-        let json_extension = ".json".to_string();
+                // remainder is the random number between the min and max
+                let remainder = seed
+                    .checked_rem((recipe.max - recipe.min) + 1)
+                    .ok_or(MplHybridError::RandomnessError)?
+                    + recipe.min;
 
-        uri.push_str(&remainder.to_string());
-        uri.push_str(&json_extension);
+                // Calculate the bit and byte offset from the end of the account of `remainder`.
+                let account_data_len = recipe.to_account_info().data_len();
+                let byte_offset = (remainder >> 3) as usize;
+                let bit_offset: u8 = (remainder & 0b111) as u8;
+
+                // If the bit at the offset is 0, the URI is unused.
+                if !Path::NoRerollMetadata.check(recipe.path) {
+                    // Use the remainder as the new URI.
+                    uri.push_str(&remainder.to_string());
+                    uri.push_str(&json_extension);
+                    break;
+                } else if (recipe.to_account_info().try_borrow_data()?
+                    [account_data_len - byte_offset - 1]
+                    & (1 << bit_offset))
+                    == 0
+                {
+                    // Use the remainder as the new URI.
+                    uri.push_str(&remainder.to_string());
+                    uri.push_str(&json_extension);
+
+                    // Set the bit to 1 to mark it as used.
+                    recipe.to_account_info().try_borrow_mut_data()?
+                        [account_data_len - byte_offset - 1] |= 1 << bit_offset;
+                    break;
+                }
+
+                // Otherwise it's in use and we try the next entropy value.
+                entropy += 1;
+            }
+            (uri, name)
+        };
 
         //create update instruction
         let update_ix = UpdateV1Cpi {
@@ -252,16 +289,32 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
 
     let cpi_program = token_program.to_account_info();
 
-    //create transfer token instruction
-    let cpi_accounts_transfer = Transfer {
-        from: user_token_account.to_account_info(),
-        to: escrow_token_account.to_account_info(),
-        authority: owner.to_account_info(),
-    };
+    // If the path has burn on capture, we burn the token
+    if Path::BurnOnCapture.check(recipe.path) {
+        //create burn instruction
+        let cpi_accounts_burn = Burn {
+            mint: ctx.accounts.token.to_account_info(),
+            from: user_token_account.to_account_info(),
+            authority: owner.to_account_info(),
+        };
 
-    let transfer_cpi_ctx = CpiContext::new(cpi_program.clone(), cpi_accounts_transfer);
+        let burn_cpi_ctx = CpiContext::new(cpi_program.clone(), cpi_accounts_burn);
 
-    token::transfer(transfer_cpi_ctx, recipe.amount)?;
+        token::burn(burn_cpi_ctx, recipe.amount)?;
+    }
+    // Otherwise, we transfer the token to the escrow
+    else {
+        //create transfer token instruction
+        let cpi_accounts_transfer = Transfer {
+            from: user_token_account.to_account_info(),
+            to: escrow_token_account.to_account_info(),
+            authority: owner.to_account_info(),
+        };
+
+        let transfer_cpi_ctx = CpiContext::new(cpi_program.clone(), cpi_accounts_transfer);
+
+        token::transfer(transfer_cpi_ctx, recipe.amount)?;
+    }
 
     //create transfer fee token instruction
     let cpi_accounts_fee_transfer = Transfer {

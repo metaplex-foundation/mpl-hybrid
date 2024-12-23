@@ -113,6 +113,7 @@ pub fn handler_update_escrow_v1(
         // Count is set at a starting value of 1 while initializing the escrow so 1 === no swaps.
         if escrow.count > 1
             && Path::NoRerollMetadata.check(escrow.path) != Path::NoRerollMetadata.check(path)
+            && Path::RerollMetadataV2.check(escrow.path) != Path::RerollMetadataV2.check(path)
         {
             return Err(MplHybridError::PathCannotBeSet.into());
         }

@@ -21,6 +21,7 @@ import {
   MPL_HYBRID_PROGRAM_ID,
   Path,
   releaseV2,
+  RerollV2Setting,
 } from '../../src';
 import { createCoreCollection, createUmi } from '../_setup';
 
@@ -544,4 +545,417 @@ test('it can swap an asset for tokens as UpdateDelegate without reroll', async (
 
   // Make sure the URI has not changed.
   t.is(assetAfter.uri, 'https://example.com/asset');
+});
+
+test('it cannot swap an asset for tokens with BlockRelease', async (t) => {
+  // Given a Umi instance using the project's plugin.
+  const umi = await createUmi();
+  const feeLocation = generateSigner(umi);
+  const { assets, collection } = await createCoreCollection(umi);
+  const tokenMint = generateSigner(umi);
+  await createFungible(umi, {
+    name: 'Test Token',
+    uri: 'www.fungible.com',
+    sellerFeeBasisPoints: {
+      basisPoints: 0n,
+      identifier: '%',
+      decimals: 2,
+    },
+    mint: tokenMint,
+  }).sendAndConfirm(umi);
+
+  await initEscrowV2(umi, {}).sendAndConfirm(umi);
+
+  const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('escrow'),
+    publicKeySerializer().serialize(umi.identity.publicKey),
+  ]);
+
+  t.like(await fetchEscrowV2(umi, escrow), <EscrowV2>{
+    authority: umi.identity.publicKey,
+    bump: escrow[1],
+  });
+
+  await mintV1(umi, {
+    mint: tokenMint.publicKey,
+    tokenStandard: TokenStandard.Fungible,
+    tokenOwner: escrow,
+    amount: 1000,
+  }).sendAndConfirm(umi);
+
+  await initRecipeV1(umi, {
+    collection: collection.publicKey,
+    token: tokenMint.publicKey,
+    feeLocation: feeLocation.publicKey,
+    name: 'Test Escrow',
+    uri: 'www.test.com/',
+    max: 9,
+    min: 0,
+    amount: 5,
+    feeAmountCapture: 1,
+    feeAmountRelease: 0,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
+    path: buildPath([Path.NoRerollMetadata, Path.BlockRelease]),
+  }).sendAndConfirm(umi);
+
+  const recipe = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('recipe'),
+    publicKeySerializer().serialize(collection.publicKey),
+  ]);
+
+  await addCollectionPlugin(umi, {
+    collection: collection.publicKey,
+    plugin: {
+      type: 'UpdateDelegate',
+      additionalDelegates: [],
+      authority: { type: 'Address', address: publicKey(recipe) },
+    },
+  }).sendAndConfirm(umi);
+
+  t.like(await fetchRecipeV1(umi, recipe), {
+    publicKey: publicKey(recipe),
+    collection: collection.publicKey,
+    authority: umi.identity.publicKey,
+    token: tokenMint.publicKey,
+    feeLocation: feeLocation.publicKey,
+    name: 'Test Escrow',
+    uri: 'www.test.com/',
+    max: 9n,
+    min: 0n,
+    amount: 5n,
+    feeAmountCapture: 1n,
+    feeAmountRelease: 0n,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
+    count: 1n,
+    path: buildPath([Path.NoRerollMetadata, Path.BlockRelease]),
+    bump: recipe[1],
+  });
+
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
+  t.deepEqual(escrowTokenBefore.token.amount, 1000n);
+  try {
+    await fetchDigitalAssetWithAssociatedToken(
+      umi,
+      tokenMint.publicKey,
+      umi.identity.publicKey
+    );
+    t.fail('User token account should not exist');
+  } catch (e) {
+    t.is(e.name, 'AccountNotFoundError');
+  }
+
+  t.is(assets[0].owner, umi.identity.publicKey);
+
+  const result = releaseV2(umi, {
+    owner: umi.identity,
+    authority: recipe,
+    recipe,
+    escrow,
+    asset: assets[0].publicKey,
+    collection: collection.publicKey,
+    feeProjectAccount: feeLocation.publicKey,
+    token: tokenMint.publicKey,
+  }).sendAndConfirm(umi);
+
+  await t.throwsAsync(result, { name: 'ReleaseBlocked' });
+});
+
+test('it can burn an asset for tokens with BurnOnRelease', async (t) => {
+  // Given a Umi instance using the project's plugin.
+  const umi = await createUmi();
+  const feeLocation = generateSigner(umi);
+  const { assets, collection } = await createCoreCollection(umi);
+  const tokenMint = generateSigner(umi);
+  await createFungible(umi, {
+    name: 'Test Token',
+    uri: 'www.fungible.com',
+    sellerFeeBasisPoints: {
+      basisPoints: 0n,
+      identifier: '%',
+      decimals: 2,
+    },
+    mint: tokenMint,
+  }).sendAndConfirm(umi);
+
+  await initEscrowV2(umi, {}).sendAndConfirm(umi);
+
+  const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('escrow'),
+    publicKeySerializer().serialize(umi.identity.publicKey),
+  ]);
+
+  t.like(await fetchEscrowV2(umi, escrow), <EscrowV2>{
+    authority: umi.identity.publicKey,
+    bump: escrow[1],
+  });
+
+  await mintV1(umi, {
+    mint: tokenMint.publicKey,
+    tokenStandard: TokenStandard.Fungible,
+    tokenOwner: escrow,
+    amount: 1000,
+  }).sendAndConfirm(umi);
+
+  await initRecipeV1(umi, {
+    collection: collection.publicKey,
+    token: tokenMint.publicKey,
+    feeLocation: feeLocation.publicKey,
+    name: 'Test Escrow',
+    uri: 'www.test.com/',
+    max: 9,
+    min: 0,
+    amount: 5,
+    feeAmountCapture: 1,
+    feeAmountRelease: 0,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
+    path: buildPath([Path.NoRerollMetadata, Path.BurnOnRelease]),
+  }).sendAndConfirm(umi);
+
+  const recipe = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('recipe'),
+    publicKeySerializer().serialize(collection.publicKey),
+  ]);
+
+  await addCollectionPlugin(umi, {
+    collection: collection.publicKey,
+    plugin: {
+      type: 'UpdateDelegate',
+      additionalDelegates: [],
+      authority: { type: 'Address', address: publicKey(recipe) },
+    },
+  }).sendAndConfirm(umi);
+
+  t.like(await fetchRecipeV1(umi, recipe), {
+    publicKey: publicKey(recipe),
+    collection: collection.publicKey,
+    authority: umi.identity.publicKey,
+    token: tokenMint.publicKey,
+    feeLocation: feeLocation.publicKey,
+    name: 'Test Escrow',
+    uri: 'www.test.com/',
+    max: 9n,
+    min: 0n,
+    amount: 5n,
+    feeAmountCapture: 1n,
+    feeAmountRelease: 0n,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
+    count: 1n,
+    path: buildPath([Path.NoRerollMetadata, Path.BurnOnRelease]),
+    bump: recipe[1],
+  });
+
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
+  t.deepEqual(escrowTokenBefore.token.amount, 1000n);
+  try {
+    await fetchDigitalAssetWithAssociatedToken(
+      umi,
+      tokenMint.publicKey,
+      umi.identity.publicKey
+    );
+    t.fail('User token account should not exist');
+  } catch (e) {
+    t.is(e.name, 'AccountNotFoundError');
+  }
+
+  t.is(assets[0].owner, umi.identity.publicKey);
+
+  await releaseV2(umi, {
+    owner: umi.identity,
+    authority: recipe,
+    recipe,
+    escrow,
+    asset: assets[0].publicKey,
+    collection: collection.publicKey,
+    feeProjectAccount: feeLocation.publicKey,
+    token: tokenMint.publicKey,
+  }).sendAndConfirm(umi);
+
+  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
+  t.deepEqual(escrowTokenAfter.token.amount, 995n);
+  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    umi.identity.publicKey
+  );
+  t.deepEqual(userTokenAfter.token.amount, 5n);
+
+  // The asset should be burned.
+  const assetAfter = await umi.rpc.getAccount(assets[0].publicKey);
+  if (assetAfter.exists) {
+    t.deepEqual(assetAfter.data, Uint8Array.from([0]));
+  } else {
+    t.fail('Asset should exist as burned');
+  }
+});
+
+test('it can swap an asset for tokens with reroll v2', async (t) => {
+  // Given a Umi instance using the project's plugin.
+  const umi = await createUmi();
+  const feeLocation = generateSigner(umi);
+  const { assets, collection } = await createCoreCollection(umi);
+  const tokenMint = generateSigner(umi);
+  await createFungible(umi, {
+    name: 'Test Token',
+    uri: 'www.fungible.com',
+    sellerFeeBasisPoints: {
+      basisPoints: 0n,
+      identifier: '%',
+      decimals: 2,
+    },
+    mint: tokenMint,
+  }).sendAndConfirm(umi);
+
+  await initEscrowV2(umi, {}).sendAndConfirm(umi);
+
+  const escrow = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('escrow'),
+    publicKeySerializer().serialize(umi.identity.publicKey),
+  ]);
+
+  t.like(await fetchEscrowV2(umi, escrow), <EscrowV2>{
+    authority: umi.identity.publicKey,
+    bump: escrow[1],
+  });
+
+  await mintV1(umi, {
+    mint: tokenMint.publicKey,
+    tokenStandard: TokenStandard.Fungible,
+    tokenOwner: escrow,
+    amount: 1000,
+  }).sendAndConfirm(umi);
+
+  await initRecipeV1(umi, {
+    collection: collection.publicKey,
+    token: tokenMint.publicKey,
+    feeLocation: feeLocation.publicKey,
+    name: 'Test Escrow',
+    uri: 'www.test.com/',
+    max: 9,
+    min: 0,
+    amount: 5,
+    feeAmountCapture: 1,
+    feeAmountRelease: 0,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
+    path: buildPath([Path.RerollMetadataV2]),
+    rerollV2Setting: RerollV2Setting.AllCaptured,
+  }).sendAndConfirm(umi);
+
+  const recipe = umi.eddsa.findPda(MPL_HYBRID_PROGRAM_ID, [
+    string({ size: 'variable' }).serialize('recipe'),
+    publicKeySerializer().serialize(collection.publicKey),
+  ]);
+
+  const recipeData = await fetchRecipeV1(umi, recipe);
+  t.like(recipeData, {
+    publicKey: publicKey(recipe),
+    collection: collection.publicKey,
+    authority: umi.identity.publicKey,
+    token: tokenMint.publicKey,
+    feeLocation: feeLocation.publicKey,
+    name: 'Test Escrow',
+    uri: 'www.test.com/',
+    max: 9n,
+    min: 0n,
+    amount: 5n,
+    feeAmountCapture: 1n,
+    feeAmountRelease: 0n,
+    solFeeAmountCapture: 100_000n,
+    solFeeAmountRelease: 890_880n,
+    count: 1n,
+    path: buildPath([Path.RerollMetadataV2]),
+    bump: recipe[1],
+  });
+
+  const escrowTokenBefore = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
+  t.deepEqual(escrowTokenBefore.token.amount, 1000n);
+  try {
+    await fetchDigitalAssetWithAssociatedToken(
+      umi,
+      tokenMint.publicKey,
+      umi.identity.publicKey
+    );
+    t.fail('User token account should not exist');
+  } catch (e) {
+    t.is(e.name, 'AccountNotFoundError');
+  }
+
+  t.is(assets[0].owner, umi.identity.publicKey);
+
+  const before = await umi.rpc.getAccount(publicKey(recipe));
+  if (before.exists) {
+    const mask = before.data.subarray(-2);
+    t.assert(mask[0] === 255);
+    t.assert(mask[1] === 255);
+  } else {
+    t.fail('Account should exist');
+  }
+
+  await releaseV2(umi, {
+    owner: umi.identity,
+    recipe,
+    escrow,
+    asset: assets[0].publicKey,
+    collection: collection.publicKey,
+    feeProjectAccount: feeLocation.publicKey,
+    token: tokenMint.publicKey,
+  }).sendAndConfirm(umi);
+
+  const after = await umi.rpc.getAccount(publicKey(recipe));
+  if (after.exists) {
+    const mask = after.data.subarray(-2);
+    // eslint-disable-next-line no-bitwise
+    const bitArray = mask[0] | (mask[1] << 8);
+
+    // Check to make sure the mask only has one bit is unset.
+    let unsetCount = 0;
+    // eslint-disable-next-line no-bitwise
+    for (let i = 0; i < 16; i += 1) {
+      // eslint-disable-next-line no-bitwise
+      if ((bitArray & (1 << i)) === 0) {
+        unsetCount += 1;
+      }
+    }
+    t.is(unsetCount, 1);
+  } else {
+    t.fail('Account should exist');
+  }
+
+  const escrowTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    publicKey(escrow)
+  );
+  t.deepEqual(escrowTokenAfter.token.amount, 995n);
+  const userTokenAfter = await fetchDigitalAssetWithAssociatedToken(
+    umi,
+    tokenMint.publicKey,
+    umi.identity.publicKey
+  );
+  t.deepEqual(userTokenAfter.token.amount, 5n);
+  const assetAfter = await fetchAsset(umi, assets[0].publicKey);
+  t.is(assetAfter.owner, publicKey(escrow));
+
+  // Confirm that an asset in the escrow has the correct URI
+  t.is(assetAfter.uri, `${recipeData.uri}captured.json`);
 });

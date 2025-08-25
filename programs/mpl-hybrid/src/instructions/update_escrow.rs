@@ -71,8 +71,18 @@ pub fn handler_update_escrow_v1(
     }
 
     // We can't allow the max to be less than the min.
-    if ix.max <= ix.min {
-        return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+    if let (Some(max), Some(min)) = (ix.max, ix.min) {
+        if max <= min {
+            return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+        }
+    } else if let Some(max) = ix.max {
+        if max <= escrow.min {
+            return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+        }
+    } else if let Some(min) = ix.min {
+        if escrow.max <= min {
+            return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+        }
     }
 
     let mut size_diff: isize = 0;

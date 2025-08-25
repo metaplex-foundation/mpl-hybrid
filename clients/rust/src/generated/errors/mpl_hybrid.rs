@@ -61,10 +61,10 @@ pub enum MplHybridError {
     /// 6016 (0x1780) - Invalid Authorities
     #[error("Invalid Authorities")]
     InvalidAuthority,
-    /// 6017 (0x1781) - Capture is blocked for this recipe
+    /// 6018 (0x1782) - Capture is blocked for this recipe
     #[error("Capture is blocked for this recipe")]
     CaptureBlocked,
-    /// 6018 (0x1782) - Release is blocked for this recipe
+    /// 6019 (0x1783) - Release is blocked for this recipe
     #[error("Release is blocked for this recipe")]
     ReleaseBlocked,
 }

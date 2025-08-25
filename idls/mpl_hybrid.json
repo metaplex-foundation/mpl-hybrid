@@ -1432,12 +1432,12 @@
       "msg": "Invalid Authorities"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "CaptureBlocked",
       "msg": "Capture is blocked for this recipe"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "ReleaseBlocked",
       "msg": "Release is blocked for this recipe"
     }

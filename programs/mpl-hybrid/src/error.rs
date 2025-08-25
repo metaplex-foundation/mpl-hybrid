@@ -69,6 +69,10 @@ pub enum MplHybridError {
     /// 6016 (0x1780) - Invalid Token Account Mint
     #[msg("Invalid Authorities")]
     InvalidAuthority,
+
+    /// 6017 (0x1781) - Invalid Token Account Mint
+    #[msg("Path can not be set")]
+    PathCannotBeSet,
     
     /// 6018 (0x1782) - Capture is blocked for this recipe
     #[msg("Capture is blocked for this recipe")]

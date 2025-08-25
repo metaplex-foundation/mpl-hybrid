@@ -1432,6 +1432,11 @@
       "msg": "Invalid Authorities"
     },
     {
+      "code": 6017,
+      "name": "PathCannotBeSet",
+      "msg": "Path can not be set"
+    },
+    {
       "code": 6018,
       "name": "CaptureBlocked",
       "msg": "Capture is blocked for this recipe"

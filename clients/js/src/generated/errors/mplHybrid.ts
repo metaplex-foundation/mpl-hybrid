@@ -239,6 +239,19 @@ export class InvalidAuthorityError extends ProgramError {
 codeToErrorMap.set(0x1780, InvalidAuthorityError);
 nameToErrorMap.set('InvalidAuthority', InvalidAuthorityError);
 
+/** PathCannotBeSet: Path can not be set */
+export class PathCannotBeSetError extends ProgramError {
+  override readonly name: string = 'PathCannotBeSet';
+
+  readonly code: number = 0x1781; // 6017
+
+  constructor(program: Program, cause?: Error) {
+    super('Path can not be set', program, cause);
+  }
+}
+codeToErrorMap.set(0x1781, PathCannotBeSetError);
+nameToErrorMap.set('PathCannotBeSet', PathCannotBeSetError);
+
 /** CaptureBlocked: Capture is blocked for this recipe */
 export class CaptureBlockedError extends ProgramError {
   override readonly name: string = 'CaptureBlocked';

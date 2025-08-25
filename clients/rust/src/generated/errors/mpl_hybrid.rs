@@ -61,6 +61,9 @@ pub enum MplHybridError {
     /// 6016 (0x1780) - Invalid Authorities
     #[error("Invalid Authorities")]
     InvalidAuthority,
+    /// 6017 (0x1781) - Path can not be set
+    #[error("Path can not be set")]
+    PathCannotBeSet,
     /// 6018 (0x1782) - Capture is blocked for this recipe
     #[error("Capture is blocked for this recipe")]
     CaptureBlocked,

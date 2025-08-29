@@ -73,8 +73,18 @@ pub fn handler_update_recipe_v1(
     }
 
     // We can't allow the max to be less than the min.
-    if ix.max <= ix.min {
-        return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+    if let (Some(max), Some(min)) = (ix.max, ix.min) {
+        if max <= min {
+            return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+        }
+    } else if let Some(max) = ix.max {
+        if max <= recipe.min {
+            return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+        }
+    } else if let Some(min) = ix.min {
+        if recipe.max <= min {
+            return Err(MplHybridError::MaxMustBeGreaterThanMin.into());
+        }
     }
 
     let mut size_diff: isize = 0;
@@ -82,17 +92,17 @@ pub fn handler_update_recipe_v1(
     recipe.token = token.key();
     recipe.fee_location = fee_location.key();
     if let Some(name) = ix.name {
-        size_diff += name
-            .len()
-            .checked_sub(recipe.name.len())
-            .ok_or(MplHybridError::NumericalOverflow)? as isize;
+        // Reason: Use signed arithmetic so shorter/equal-length names are allowed.
+        size_diff += (name.len() as isize)
+            .checked_sub(recipe.name.len() as isize)
+            .ok_or(MplHybridError::NumericalOverflow)?;
         recipe.name = name;
     }
     if let Some(uri) = ix.uri {
-        size_diff += uri
-            .len()
-            .checked_sub(recipe.uri.len())
-            .ok_or(MplHybridError::NumericalOverflow)? as isize;
+        // Reason: Use signed arithmetic so shorter/equal-length URIs are allowed.
+        size_diff += (uri.len() as isize)
+            .checked_sub(recipe.uri.len() as isize)
+            .ok_or(MplHybridError::NumericalOverflow)?;
         recipe.uri = uri;
     }
     if let Some(max) = ix.max {

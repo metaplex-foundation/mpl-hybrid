@@ -324,7 +324,7 @@
         },
         {
           "name": "token",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1328,6 +1328,18 @@
         "variants": [
           {
             "name": "NoRerollMetadata"
+          },
+          {
+            "name": "BlockCapture"
+          },
+          {
+            "name": "BlockRelease"
+          },
+          {
+            "name": "BurnOnCapture"
+          },
+          {
+            "name": "BurnOnRelease"
           }
         ]
       }
@@ -1423,6 +1435,16 @@
       "code": 6017,
       "name": "PathCannotBeSet",
       "msg": "Path can not be set"
+    },
+    {
+      "code": 6018,
+      "name": "CaptureBlocked",
+      "msg": "Capture is blocked for this recipe"
+    },
+    {
+      "code": 6019,
+      "name": "ReleaseBlocked",
+      "msg": "Release is blocked for this recipe"
     }
   ],
   "metadata": {

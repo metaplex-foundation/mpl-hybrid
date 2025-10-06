@@ -69,7 +69,6 @@ pub struct CaptureV2Ctx<'info> {
 
     /// CHECK: This is a user defined account
     #[account(
-        mut,
         address = recipe.token @MplHybridError::InvalidMintAccount
     )]
     token: Account<'info, Mint>,

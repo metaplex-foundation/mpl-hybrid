@@ -197,7 +197,7 @@ export function releaseV1(
   }
   if (!resolvedAccounts.feeSolAccount.value) {
     resolvedAccounts.feeSolAccount.value = publicKey(
-      'C3iyKknpNPeZXQEVLkR8ZJxcgB8xdsqXkyrV1RwEmdrD'
+      'GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3'
     );
   }
   if (!resolvedAccounts.recentBlockhashes.value) {

@@ -69,7 +69,7 @@ pub struct ReleaseV1Ctx<'info> {
 
     /// CHECK: We check against constant
     #[account(mut,
-        address = FEE_WALLET @ MplHybridError::InvalidConstantFeeWallet
+        address = FEE_WALLET_V1 @ MplHybridError::InvalidConstantFeeWallet
     )]
     fee_sol_account: AccountInfo<'info>,
 

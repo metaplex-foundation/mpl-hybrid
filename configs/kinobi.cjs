@@ -89,7 +89,7 @@ kinobi.update(
                 },
                 mplCore: { defaultValue: k.publicKeyValueNode("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d") },
                 recentBlockhashes: { defaultValue: k.publicKeyValueNode("SysvarS1otHashes111111111111111111111111111") },
-                feeSolAccount: { defaultValue: k.publicKeyValueNode("C3iyKknpNPeZXQEVLkR8ZJxcgB8xdsqXkyrV1RwEmdrD") }
+                feeSolAccount: { defaultValue: k.publicKeyValueNode("GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3") }
             }
         },
         releaseV1: {
@@ -103,7 +103,7 @@ kinobi.update(
                 },
                 mplCore: { defaultValue: k.publicKeyValueNode("CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d") },
                 recentBlockhashes: { defaultValue: k.publicKeyValueNode("SysvarS1otHashes111111111111111111111111111") },
-                feeSolAccount: { defaultValue: k.publicKeyValueNode("C3iyKknpNPeZXQEVLkR8ZJxcgB8xdsqXkyrV1RwEmdrD") }
+                feeSolAccount: { defaultValue: k.publicKeyValueNode("GjF4LqmEhV33riVyAwHwiEeAHx4XXFn2yMY3fmMigoP3") }
             }
         },
         initEscrowV2: {

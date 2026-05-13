@@ -24,6 +24,7 @@ getrandom = { version = "0.2.9", features = ["custom"] }
 mpl-core = "0.7.1"
 mpl-utils = "0.3.5"
 solana-program = "=1.17.22"
+solana-security-txt = "1.1.1"
 spl-associated-token-account = { version = "2.3.0", features = [
   "no-entrypoint",
 ] }

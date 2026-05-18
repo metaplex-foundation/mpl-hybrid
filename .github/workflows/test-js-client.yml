@@ -2,6 +2,9 @@ name: Test JS client
 
 on:
   workflow_call:
+    inputs:
+      git_ref:
+        type: string
 
 env:
   CACHE: true
@@ -15,16 +18,25 @@ jobs:
         node: ["16.x", "18.x"]
     steps:
       - name: Git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref || github.sha }}
 
       - name: Load environment variables
-        run: cat .github/.env >> $GITHUB_ENV
+        id: env_vars
+        run: |
+          cat .github/.env >> "$GITHUB_ENV"
+          while IFS='=' read -r key value; do
+            case "$key" in
+              SOLANA_VERSION) printf 'solana_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
+            esac
+          done < .github/.env
 
       - name: Start validator
         uses: metaplex-foundation/actions/start-validator@v1
         with:
           node: ${{ matrix.node }}
-          solana: ${{ env.SOLANA_VERSION }}
+          solana: ${{ steps.env_vars.outputs.solana_version }}
           cache: ${{ env.CACHE }}
 
       - name: Install dependencies
@@ -47,15 +59,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_ref || github.sha }}
 
       - name: Load environment variables
-        run: cat .github/.env >> $GITHUB_ENV
+        id: env_vars
+        run: |
+          cat .github/.env >> "$GITHUB_ENV"
+          while IFS='=' read -r key value; do
+            case "$key" in
+              NODE_VERSION) printf 'node_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
+            esac
+          done < .github/.env
 
       - name: Install Node.js
         uses: metaplex-foundation/actions/install-node-with-pnpm@v1
         with:
-          version: ${{ env.NODE_VERSION }}
+          version: ${{ steps.env_vars.outputs.node_version }}
           cache: ${{ env.CACHE }}
 
       - name: Install dependencies

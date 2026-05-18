@@ -187,6 +187,7 @@ jobs:
       - name: Identify Program
         run: |
           printf 'PROGRAM_NAME=%s\n' "mpl_${{ inputs.program }}" >> "$GITHUB_ENV"
+          printf 'PROGRAM_PACKAGE=%s\n' "mpl-${{ inputs.program }}-program" >> "$GITHUB_ENV"
 
       - name: Write signer files
         if: github.event.inputs.dry_run == 'false'
@@ -225,7 +226,9 @@ jobs:
             --mount-path . \
             --commit-hash "${COMMIT_HASH}" \
             --skip-prompt \
-            https://github.com/metaplex-foundation/mpl-hybrid.git
+            https://github.com/metaplex-foundation/mpl-hybrid.git \
+            -- \
+            --package "${PROGRAM_PACKAGE}"
 
       - name: Submit remote verification job
         if: github.event.inputs.dry_run == 'false' && inputs.cluster == 'mainnet-beta'

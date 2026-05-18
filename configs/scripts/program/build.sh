@@ -80,9 +80,38 @@ resolve_library_name() {
     echo "${lib_name}"
 }
 
+# Resolve the package name so `solana-verify` does not pick another workspace
+# member that happens to emit the same library filename.
+resolve_package_name() {
+    local program_dir="$1"
+    local cargo_toml="${WORKING_DIR}/programs/${program_dir}/Cargo.toml"
+    local package_name=""
+
+    if [ -f "${cargo_toml}" ]; then
+        package_name=$(awk '
+            /^\[package\]/ { in_package = 1; next }
+            /^\[/         { in_package = 0 }
+            in_package && /^[[:space:]]*name[[:space:]]*=/ {
+                sub(/#.*/, "", $0)
+                gsub(/[" ]/, "", $0)
+                split($0, parts, "=")
+                print parts[2]
+                exit
+            }
+        ' "${cargo_toml}")
+    fi
+
+    if [ -z "${package_name}" ]; then
+        package_name="${program_dir}-program"
+    fi
+
+    echo "${package_name}"
+}
+
 for p in "${PROGRAM_LIST[@]}"; do
     LIB_NAME=$(resolve_library_name "${p}")
-    echo "Building verified program: ${p} (library: ${LIB_NAME})"
+    PACKAGE_NAME=$(resolve_package_name "${p}")
+    echo "Building verified program: ${p} (library: ${LIB_NAME}, package: ${PACKAGE_NAME})"
 
     # `solana-verify build` runs the build inside a deterministic docker image
     # so the resulting .so hash matches a remote verification of the same
@@ -90,7 +119,7 @@ for p in "${PROGRAM_LIST[@]}"; do
     # root regardless of which program was selected.
     # ${ARGS[@]+"${ARGS[@]}"} guards against empty-array expansion under
     # `set -u` on Bash < 4.4.
-    solana-verify build "${BASE_IMAGE_ARGS[@]}" --library-name "${LIB_NAME}" ${ARGS[@]+"${ARGS[@]}"}
+    solana-verify build "${BASE_IMAGE_ARGS[@]}" --library-name "${LIB_NAME}" -- --package "${PACKAGE_NAME}" ${ARGS[@]+"${ARGS[@]}"}
 
     cp "${WORKING_DIR}/target/deploy/${LIB_NAME}.so" "${WORKING_DIR}/${OUTPUT}/${LIB_NAME}.so"
 done

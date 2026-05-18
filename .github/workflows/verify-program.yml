@@ -80,6 +80,7 @@ jobs:
           HYBRID_DEPLOYER_KEY: ${{ secrets.HYBRID_DEPLOYER_KEY }}
         run: |
           printf 'PROGRAM_NAME=%s\n' "mpl_${{ inputs.program }}" >> "$GITHUB_ENV"
+          printf 'PROGRAM_PACKAGE=%s\n' "mpl-${{ inputs.program }}-program" >> "$GITHUB_ENV"
           printf '%s' "$HYBRID_ID" > ./program-id.json
           printf '%s' "$HYBRID_DEPLOYER_KEY" > ./deployer-key.json
 
@@ -98,7 +99,9 @@ jobs:
             --mount-path . \
             --commit-hash "${COMMIT_HASH}" \
             --skip-prompt \
-            https://github.com/metaplex-foundation/mpl-hybrid.git
+            https://github.com/metaplex-foundation/mpl-hybrid.git \
+            -- \
+            --package "${PROGRAM_PACKAGE}"
 
       - name: Submit remote verification job
         run: |

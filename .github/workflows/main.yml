@@ -66,7 +66,16 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Load environment variables
-        run: cat .github/.env >> $GITHUB_ENV
+        id: env_vars
+        run: |
+          cat .github/.env >> "$GITHUB_ENV"
+          while IFS='=' read -r key value; do
+            case "$key" in
+              IDL_RUST_VERSION) printf 'idl_rust_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
+              SOLANA_VERSION) printf 'solana_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
+              NODE_VERSION) printf 'node_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
+            esac
+          done < .github/.env
 
       - name: Install Linux Build Deps
         run: sudo apt-get update && sudo apt-get install -y pkg-config build-essential libudev-dev
@@ -74,12 +83,12 @@ jobs:
       - name: Install Rust
         uses: metaplex-foundation/actions/install-rust@v1
         with:
-          toolchain: ${{ env.RUST_VERSION }}
+          toolchain: ${{ steps.env_vars.outputs.idl_rust_version }}
 
       - name: Install Solana
         uses: metaplex-foundation/actions/install-solana@v1
         with:
-          version: ${{ env.SOLANA_VERSION }}
+          version: ${{ steps.env_vars.outputs.solana_version }}
           cache: ${{ env.CACHE }}
 
       - name: Cache program dependencies
@@ -89,7 +98,7 @@ jobs:
       - name: Install Node.js
         uses: metaplex-foundation/actions/install-node-with-pnpm@v1
         with:
-          version: ${{ env.NODE_VERSION }}
+          version: ${{ steps.env_vars.outputs.node_version }}
           cache: ${{ env.CACHE }}
           dependencies: true
 

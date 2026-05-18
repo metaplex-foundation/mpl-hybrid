@@ -26,7 +26,12 @@ PROGRAM_LINES="$(
     printf '%s\n' "${PROGRAMS}" |
         jq -cer 'if type == "array" and length > 0 then .[] else error("PROGRAMS must be a non-empty JSON array") end'
 )"
-mapfile -t PROGRAM_LIST <<< "${PROGRAM_LINES}"
+PROGRAM_LIST=()
+while IFS= read -r program; do
+    PROGRAM_LIST+=("${program}")
+done <<EOF
+${PROGRAM_LINES}
+EOF
 
 # creates the output directory if it doesn't exist
 mkdir -p "${OUTPUT}"

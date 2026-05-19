@@ -84,6 +84,15 @@ jobs:
           printf '%s' "$HYBRID_ID" > ./program-id.json
           printf '%s' "$HYBRID_DEPLOYER_KEY" > ./deployer-key.json
 
+      # solana-verify 0.4.15 unconditionally loads ~/.config/solana/cli/config.yml
+      # during PDA upload (Ellipsis-Labs/solana-verifiable-build process_otter_verify_ixs),
+      # so initialize a CLI config even though --keypair and --url are passed explicitly.
+      - name: Initialize Solana CLI config for solana-verify
+        run: |
+          solana config set \
+            --url "${RPC}" \
+            --keypair "${GITHUB_WORKSPACE}/deployer-key.json"
+
       - name: Upload verified-build PDA
         run: |
           PROGRAM_ID="$(solana-keygen pubkey ./program-id.json)"

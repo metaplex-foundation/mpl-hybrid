@@ -3,6 +3,19 @@ use instructions::*;
 
 declare_id!("MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb");
 
+#[cfg(not(feature = "no-entrypoint"))]
+solana_security_txt::security_txt! {
+    // Required fields
+    name: "Mpl Hybrid",
+    project_url: "https://metaplex.com",
+    contacts: "email:security@metaplex.foundation",
+    policy: "Report suspected vulnerabilities privately by emailing security@metaplex.foundation before public disclosure.",
+
+    // Optional fields
+    preferred_languages: "en",
+    source_code: "https://github.com/metaplex-foundation/mpl-hybrid"
+}
+
 pub mod constants;
 pub mod error;
 pub mod instructions;

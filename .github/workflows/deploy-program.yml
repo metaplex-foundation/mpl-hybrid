@@ -109,7 +109,7 @@ jobs:
       - name: Load environment variables
         id: env_vars
         run: |
-          grep -E '^(RUST_VERSION|DEPLOY_SOLANA_VERSION|SOLANA_VERIFY_VERSION|SOLANA_VERIFY_BASE_IMAGE|COMMIT_USER_NAME|COMMIT_USER_EMAIL)=' .github/.env >> "$GITHUB_ENV"
+          grep -E '^(RUST_VERSION|DEPLOY_SOLANA_VERSION|SOLANA_VERIFY_RUST_VERSION|SOLANA_VERIFY_VERSION|SOLANA_VERIFY_BASE_IMAGE|COMMIT_USER_NAME|COMMIT_USER_EMAIL)=' .github/.env >> "$GITHUB_ENV"
           while IFS='=' read -r key value; do
             case "$key" in
               RUST_VERSION) printf 'rust_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
@@ -133,7 +133,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libudev-dev pkg-config
-          cargo install solana-verify --locked --force --version "${SOLANA_VERIFY_VERSION}"
+          rustup toolchain install "${SOLANA_VERIFY_RUST_VERSION}" --profile minimal
+          cargo "+${SOLANA_VERIFY_RUST_VERSION}" install solana-verify --locked --force --version "${SOLANA_VERIFY_VERSION}"
 
       - name: Install cargo-release
         uses: metaplex-foundation/actions/install-cargo-release@v1

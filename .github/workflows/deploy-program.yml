@@ -45,6 +45,13 @@ on:
 
 env:
   CACHE: true
+  # Hard-coded and digest-pinned to keep the verified build reproducible and to
+  # prevent a PR-controlled `.github/.env` from redirecting `solana-verify
+  # verify-from-repo --base-image` at a malicious image (the deploy job runs
+  # this with the deployer keypair on disk). Update this digest in lockstep
+  # with the same value in `.github/workflows/build-programs.yml` and
+  # `.github/workflows/verify-program.yml`.
+  SOLANA_VERIFY_BASE_IMAGE: solanafoundation/solana-verifiable-build@sha256:ec2e20e1f80607150a71e4c72adfe64be24347ed0b4fb741c32b34eaf7549a25
 
 jobs:
   build_programs:
@@ -109,7 +116,7 @@ jobs:
       - name: Load environment variables
         id: env_vars
         run: |
-          grep -E '^(RUST_VERSION|DEPLOY_SOLANA_VERSION|SOLANA_VERIFY_VERSION|SOLANA_VERIFY_BASE_IMAGE|COMMIT_USER_NAME|COMMIT_USER_EMAIL)=' .github/.env >> "$GITHUB_ENV"
+          grep -E '^(RUST_VERSION|DEPLOY_SOLANA_VERSION|SOLANA_VERIFY_VERSION|COMMIT_USER_NAME|COMMIT_USER_EMAIL)=' .github/.env >> "$GITHUB_ENV"
           while IFS='=' read -r key value; do
             case "$key" in
               RUST_VERSION) printf 'rust_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;

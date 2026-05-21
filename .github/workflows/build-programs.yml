@@ -29,6 +29,12 @@ on:
 
 env:
   CACHE: true
+  # Hard-coded and digest-pinned to keep the verified build reproducible and to
+  # prevent a PR-controlled `.github/.env` from redirecting `solana-verify
+  # build --base-image` at a malicious image. Update this digest in lockstep
+  # with SOLANA_VERIFY_VERSION / SOLANA_VERSION in `.github/.env` and surface
+  # the change in the PR description for reviewer scrutiny.
+  SOLANA_VERIFY_BASE_IMAGE: solanafoundation/solana-verifiable-build@sha256:ec2e20e1f80607150a71e4c72adfe64be24347ed0b4fb741c32b34eaf7549a25
 
 jobs:
   build_programs:

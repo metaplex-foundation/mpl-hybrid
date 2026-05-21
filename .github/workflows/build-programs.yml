@@ -49,7 +49,11 @@ jobs:
       - name: Load environment variables
         id: env_vars
         run: |
-          cat .github/.env >> "$GITHUB_ENV"
+          # Allowlist instead of a blanket `cat .github/.env >> "$GITHUB_ENV"`
+          # so a reintroduced `SOLANA_VERIFY_BASE_IMAGE` (or any other key)
+          # in `.github/.env` cannot override the workflow-level pin above
+          # (`$GITHUB_ENV` wins over workflow `env:` for subsequent steps).
+          grep -E '^(CARGO_TERM_COLOR|RUST_VERSION|SOLANA_VERSION|SOLANA_VERIFY_VERSION|PROGRAMS)=' .github/.env >> "$GITHUB_ENV"
           while IFS='=' read -r key value; do
             case "$key" in
               RUST_VERSION) printf 'rust_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;

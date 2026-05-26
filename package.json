@@ -3,7 +3,6 @@
     "scripts": {
         "programs:build": "./configs/scripts/program/build.sh",
         "programs:test": "./configs/scripts/program/test.sh",
-        "programs:verify": "./configs/scripts/program/verify-from-repo.sh",
         "programs:clean": "rm -rf ./programs/.bin",
         "generate": "pnpm generate:idls && pnpm generate:clients",
         "generate:idls": "node ./configs/shank.cjs",

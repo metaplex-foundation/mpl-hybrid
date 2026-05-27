@@ -43,7 +43,10 @@ jobs:
       - name: Load environment variables
         id: env_vars
         run: |
-          cat .github/.env >> "$GITHUB_ENV"
+          # Allowlist instead of a blanket `cat .github/.env >> "$GITHUB_ENV"`
+          # so a PR-editable key in `.github/.env` cannot inject arbitrary env
+          # vars into subsequent steps.
+          grep -E '^(CARGO_TERM_COLOR|RUST_VERSION|SOLANA_VERSION|SOLANA_VERIFY_VERSION|PROGRAMS)=' .github/.env >> "$GITHUB_ENV"
           while IFS='=' read -r key value; do
             case "$key" in
               RUST_VERSION) printf 'rust_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
@@ -66,20 +69,22 @@ jobs:
         if: env.CACHE == 'true'
         uses: metaplex-foundation/actions/cache-programs@v1
 
-      - name: Install libudev (required by solana-verify)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libudev-dev pkg-config
+      - name: Install solana-verify
+        uses: metaplex-foundation/actions/install-solana-verify@v1
+        with:
+          version: ${{ env.SOLANA_VERIFY_VERSION }}
 
-      - name: Install Solana Verify
-        run: cargo install solana-verify --locked --force --version "${SOLANA_VERIFY_VERSION}"
+      - name: Build mpl-hybrid (verified)
+        uses: metaplex-foundation/actions/verified-build@v1
+        with:
+          library-name: mpl_hybrid
+          package: mpl-hybrid-program
+          solana-version: ${{ inputs.solana || steps.env_vars.outputs.solana_version }}
+          output-dir: programs/.bin
 
-      - name: Build programs
+      - name: Dump external program binaries
+        run: ./configs/scripts/program/dump.sh ./programs/.bin
         shell: bash
-        working-directory: configs/scripts/program
-        run: ./build.sh
-        env:
-          PROGRAMS: ${{ env.PROGRAMS }}
 
       - name: Upload program builds
         uses: actions/upload-artifact@v4

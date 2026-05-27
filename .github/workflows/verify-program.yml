@@ -40,16 +40,13 @@ jobs:
       - name: Load environment variables
         id: env_vars
         run: |
-          grep -E '^(RUST_VERSION|DEPLOY_SOLANA_VERSION|SOLANA_VERIFY_VERSION|SOLANA_VERIFY_BASE_IMAGE)=' .github/.env >> "$GITHUB_ENV"
+          grep -E '^(RUST_VERSION|SOLANA_VERSION|DEPLOY_SOLANA_VERSION|SOLANA_VERIFY_VERSION)=' .github/.env >> "$GITHUB_ENV"
           while IFS='=' read -r key value; do
             case "$key" in
               RUST_VERSION) printf 'rust_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
               DEPLOY_SOLANA_VERSION) printf 'deploy_solana_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
             esac
           done < .github/.env
-
-      - name: Install Linux build deps
-        run: sudo apt-get update && sudo apt-get install -y libudev-dev pkg-config
 
       - name: Install Rust
         uses: metaplex-foundation/actions/install-rust@v1
@@ -62,8 +59,10 @@ jobs:
           version: ${{ steps.env_vars.outputs.deploy_solana_version }}
           cache: ${{ env.CACHE }}
 
-      - name: Install Solana Verify
-        run: cargo install solana-verify --locked --force --version "${SOLANA_VERIFY_VERSION}"
+      - name: Install solana-verify
+        uses: metaplex-foundation/actions/install-solana-verify@v1
+        with:
+          version: ${{ env.SOLANA_VERIFY_VERSION }}
 
       - name: Set RPC
         run: |
@@ -84,43 +83,15 @@ jobs:
           printf '%s' "$HYBRID_ID" > ./program-id.json
           printf '%s' "$HYBRID_DEPLOYER_KEY" > ./deployer-key.json
 
-      # solana-verify 0.4.15 unconditionally loads ~/.config/solana/cli/config.yml
-      # during PDA upload (Ellipsis-Labs/solana-verifiable-build process_otter_verify_ixs),
-      # so initialize a CLI config even though --keypair and --url are passed explicitly.
-      - name: Initialize Solana CLI config for solana-verify
-        run: |
-          solana config set \
-            --url "${RPC}" \
-            --keypair "${GITHUB_WORKSPACE}/deployer-key.json"
-
-      - name: Upload verified-build PDA
-        run: |
-          PROGRAM_ID="$(solana-keygen pubkey ./program-id.json)"
-          COMMIT_HASH="$(git rev-parse HEAD)"
-
-          solana-verify verify-from-repo \
-            --current-dir \
-            --program-id "${PROGRAM_ID}" \
-            --url "${RPC}" \
-            --keypair ./deployer-key.json \
-            --base-image "${SOLANA_VERIFY_BASE_IMAGE}" \
-            --library-name "${PROGRAM_NAME}" \
-            --mount-path . \
-            --commit-hash "${COMMIT_HASH}" \
-            --skip-prompt \
-            https://github.com/metaplex-foundation/mpl-hybrid.git \
-            -- \
-            --package "${PROGRAM_PACKAGE}"
-
-      - name: Submit remote verification job
-        run: |
-          PROGRAM_ID="$(solana-keygen pubkey ./program-id.json)"
-          UPLOADER="$(solana-keygen pubkey ./deployer-key.json)"
-
-          solana-verify remote submit-job \
-            --url "${RPC}" \
-            --program-id "${PROGRAM_ID}" \
-            --uploader "${UPLOADER}"
+      - name: Verify program
+        uses: metaplex-foundation/actions/verify-program@v1
+        with:
+          program-id-keypair: ./program-id.json
+          keypair: ./deployer-key.json
+          rpc-url: ${{ env.RPC }}
+          library-name: ${{ env.PROGRAM_NAME }}
+          package: ${{ env.PROGRAM_PACKAGE }}
+          solana-version: ${{ env.SOLANA_VERSION }}
 
       - name: Clean up signer files
         if: always()

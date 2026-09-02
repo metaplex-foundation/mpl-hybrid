@@ -299,7 +299,7 @@ pub fn handler_capture_v2(ctx: Context<CaptureV2Ctx>) -> Result<()> {
     let sol_fee_ix = anchor_lang::solana_program::system_instruction::transfer(
         &owner.key(),
         &fee_sol_account.key(),
-        get_protocol_fee()?,
+        PROTOCOL_FEE,
     );
 
     //invoke protocol the transfer fee sol instruction

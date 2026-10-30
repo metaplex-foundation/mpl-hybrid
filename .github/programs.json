@@ -1,0 +1,23 @@
+{
+  "$comment": "Program descriptors for the shared CI in metaplex-foundation/actions. Toolchain pins live in .github/.env.",
+  "programs": [
+    {
+      "name": "mpl-hybrid",
+      "package": "mpl-hybrid-program",
+      "library": "mpl_hybrid",
+      "release_tag": "hybrid",
+      "deploy": {
+        "program_id": "MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb",
+        "repo_visibility": "public",
+        "clusters": {
+          "devnet": {
+            "type": "direct"
+          },
+          "mainnet-beta": {
+            "type": "direct"
+          }
+        }
+      }
+    }
+  ]
+}

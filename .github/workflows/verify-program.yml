@@ -10,89 +10,33 @@ on:
       program:
         description: Program
         required: true
-        default: hybrid
+        default: mpl-hybrid
         type: choice
-        options:
-          - hybrid
+        options: [mpl-hybrid]
       cluster:
         description: Cluster environment
         required: true
         default: mainnet-beta
         type: choice
-        options:
-          - mainnet-beta
+        options: [mainnet-beta]
 
-env:
-  CACHE: true
+permissions: {}
 
 jobs:
-  verify_program:
-    name: Program / Verify
-    runs-on: ubuntu-latest-16-cores
+  verify:
+    name: Program
+    uses: metaplex-foundation/actions/.github/workflows/verify-program.yml@8fcadb6df757cba34aa8475373886eca9b6ce8cf # v2.0.1
     permissions:
       contents: read
-    steps:
-      - name: Git checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.git_ref }}
-
-      - name: Load environment variables
-        id: env_vars
-        run: |
-          grep -E '^(RUST_VERSION|SOLANA_VERSION|DEPLOY_SOLANA_VERSION|SOLANA_VERIFY_VERSION)=' .github/.env >> "$GITHUB_ENV"
-          while IFS='=' read -r key value; do
-            case "$key" in
-              RUST_VERSION) printf 'rust_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
-              DEPLOY_SOLANA_VERSION) printf 'deploy_solana_version=%s\n' "$value" >> "$GITHUB_OUTPUT" ;;
-            esac
-          done < .github/.env
-
-      - name: Install Rust
-        uses: metaplex-foundation/actions/install-rust@v1
-        with:
-          toolchain: ${{ steps.env_vars.outputs.rust_version }}
-
-      - name: Install Solana
-        uses: metaplex-foundation/actions/install-solana@v1
-        with:
-          version: ${{ steps.env_vars.outputs.deploy_solana_version }}
-          cache: ${{ env.CACHE }}
-
-      - name: Install solana-verify
-        uses: metaplex-foundation/actions/install-solana-verify@v1
-        with:
-          version: ${{ env.SOLANA_VERIFY_VERSION }}
-
-      - name: Set RPC
-        run: |
-          if [ "${{ inputs.cluster }}" == "mainnet-beta" ]; then
-            printf 'RPC=%s\n' "${{ secrets.MAINNET_RPC }}" >> "$GITHUB_ENV"
-          else
-            echo "Invalid cluster: ${{ inputs.cluster }}"
-            exit 1
-          fi
-
-      - name: Identify Program
-        env:
-          HYBRID_ID: ${{ secrets.HYBRID_ID }}
-          HYBRID_DEPLOYER_KEY: ${{ secrets.HYBRID_DEPLOYER_KEY }}
-        run: |
-          printf 'PROGRAM_NAME=%s\n' "mpl_${{ inputs.program }}" >> "$GITHUB_ENV"
-          printf 'PROGRAM_PACKAGE=%s\n' "mpl-${{ inputs.program }}-program" >> "$GITHUB_ENV"
-          printf '%s' "$HYBRID_ID" > ./program-id.json
-          printf '%s' "$HYBRID_DEPLOYER_KEY" > ./deployer-key.json
-
-      - name: Verify program
-        uses: metaplex-foundation/actions/verify-program@v1
-        with:
-          program-id-keypair: ./program-id.json
-          keypair: ./deployer-key.json
-          rpc-url: ${{ env.RPC }}
-          library-name: ${{ env.PROGRAM_NAME }}
-          package: ${{ env.PROGRAM_PACKAGE }}
-          solana-version: ${{ env.SOLANA_VERSION }}
-
-      - name: Clean up signer files
-        if: always()
-        run: rm -f ./deployer-key.json ./program-id.json
+    secrets:
+      RPC_URL: ${{ secrets.MAINNET_RPC }}
+      PROGRAM_ID_KEYPAIR: ${{ secrets.HYBRID_ID }}
+      DEPLOYER_KEYPAIR: >-
+        ${{ inputs.cluster == 'devnet' && secrets.HYBRID_DEPLOYER_KEY
+         || inputs.cluster == 'mainnet-beta' && secrets.HYBRID_DEPLOYER_KEY
+         || '' }}
+    with:
+      program: ${{ inputs.program }}
+      cluster: ${{ inputs.cluster }}
+      git_ref: ${{ inputs.git_ref }}
+      runner: ubuntu-latest-16-cores

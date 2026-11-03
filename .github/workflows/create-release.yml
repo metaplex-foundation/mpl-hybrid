@@ -1,0 +1,108 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+    inputs:
+      program:
+        description: Program
+        required: true
+        default: mpl-hybrid
+        type: choice
+        options: [mpl-hybrid]
+      bump:
+        description: Version bump
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major]
+      git_ref:
+        description: Commit hash or branch to create the release from
+        required: false
+        type: string
+        default: main
+
+permissions: {}
+
+concurrency:
+  # One release per program at a time.
+  group: create-release-${{ inputs.program }}
+  cancel-in-progress: false
+
+jobs:
+  check_tag:
+    name: Check tag
+    runs-on: ubuntu-latest
+    permissions:
+      # Resolves the ref to a commit.
+      contents: read
+    outputs:
+      sha: ${{ steps.set_type.outputs.sha }}
+    steps:
+      - name: Check tag
+        id: set_type
+        env:
+          GIT_REF: ${{ inputs.git_ref }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Resolve the branch to one commit: build, test and the release tag must
+          # all refer to the same source, even if the branch moves meanwhile.
+          if [[ "$GIT_REF" == release/*@* ]]; then
+            echo "::error::a release is cut from a commit or branch, not from the release tag '$GIT_REF'"
+            exit 1
+          fi
+          if [ -z "$GIT_REF" ]; then
+            SHA="$GITHUB_SHA"
+          else
+            SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GIT_REF}" --jq .sha)" \
+              || { echo "::error::'$GIT_REF' is not a commit, branch or tag of this repository"; exit 1; }
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "$GIT_REF -> $SHA"
+
+  build_programs:
+    name: Programs
+    needs: check_tag
+    uses: metaplex-foundation/actions/.github/workflows/build-programs.yml@8fcadb6df757cba34aa8475373886eca9b6ce8cf # v2.0.1
+    permissions:
+      contents: read
+    with:
+      git_ref: ${{ needs.check_tag.outputs.sha }}
+
+  test_programs:
+    name: Programs
+    needs: [check_tag, build_programs]
+    uses: metaplex-foundation/actions/.github/workflows/test-programs.yml@8fcadb6df757cba34aa8475373886eca9b6ce8cf # v2.0.1
+    permissions:
+      contents: read
+    with:
+      program_matrix: '["${{ inputs.program }}"]'
+      git_ref: ${{ needs.check_tag.outputs.sha }}
+
+  test_js:
+    name: JS client
+    needs: [check_tag, build_programs]
+    uses: metaplex-foundation/actions/.github/workflows/test-js-client.yml@8fcadb6df757cba34aa8475373886eca9b6ce8cf # v2.0.1
+    permissions:
+      contents: read
+    with:
+      git_ref: ${{ needs.check_tag.outputs.sha }}
+
+  test_rust:
+    name: Rust client
+    needs: [check_tag, build_programs]
+    uses: metaplex-foundation/actions/.github/workflows/test-rust-client.yml@8fcadb6df757cba34aa8475373886eca9b6ce8cf # v2.0.1
+    permissions:
+      contents: read
+    with:
+      git_ref: ${{ needs.check_tag.outputs.sha }}
+
+  create_release:
+    name: Program
+    needs: [check_tag, build_programs, test_js, test_rust, test_programs]
+    uses: metaplex-foundation/actions/.github/workflows/create-release.yml@8fcadb6df757cba34aa8475373886eca9b6ce8cf # v2.0.1
+    permissions:
+      contents: write
+    with:
+      program: ${{ inputs.program }}
+      bump: ${{ inputs.bump }}
+      git_ref: ${{ needs.check_tag.outputs.sha }}
